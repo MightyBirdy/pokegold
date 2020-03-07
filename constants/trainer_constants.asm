@@ -1,4 +1,20 @@
-; trainer groups
+trainerclass: MACRO
+	enum \1
+const_value = 1
+ENDM
+
+; trainer class ids
+; `trainerclass` indexes are for:
+; - TrainerClassNames (see data/trainers/class_names.asm)
+; - TrainerClassAttributes (see data/trainers/attributes.asm)
+; - TrainerClassDVs (see data/trainers/dvs.asm)
+; - TrainerGroups (see data/trainers/party_pointers.asm)
+; - TrainerEncounterMusic (see data/trainers/encounter_music.asm)
+; - TrainerPicPointers (see data/trainers/pic_pointers.asm)
+; - TrainerPalettes (see data/trainers/palettes.asm)
+; - BTTrainerClassSprites (see data/trainers/sprites.asm)
+; - BTTrainerClassGenders (see data/trainers/genders.asm)
+; trainer constants are Trainers indexes, for the sub-tables of TrainerGroups (see data/trainers/parties.asm)
 	enum_start
 CHRIS EQU __enum__
 	trainerclass TRAINER_NONE ; 0
@@ -9,41 +25,50 @@ CHRIS EQU __enum__
 
 KRIS EQU __enum__
 	trainerclass FALKNER ; 1
+	const FALKNER1
 
 	trainerclass WHITNEY ; 2
+	const WHITNEY1
 
 	trainerclass BUGSY ; 3
+	const BUGSY1
 
 	trainerclass MORTY ; 4
+	const MORTY1
 
 	trainerclass PRYCE ; 5
+	const PRYCE1
 
 	trainerclass JASMINE ; 6
+	const JASMINE1
 
 	trainerclass CHUCK ; 7
+	const CHUCK1
 
 	trainerclass CLAIR ; 8
+	const CLAIR1
 
 	trainerclass RIVAL1 ; 9
-	const RIVAL1_1
-	const RIVAL1_2
-	const RIVAL1_3
-	const RIVAL1_4
-	const RIVAL1_5
-	const RIVAL1_6
-	const RIVAL1_7
-	const RIVAL1_8
-	const RIVAL1_9
-	const RIVAL1_10
-	const RIVAL1_11
-	const RIVAL1_12
-	const RIVAL1_13
-	const RIVAL1_14
-	const RIVAL1_15
+	const RIVAL1_1_CHIKORITA
+	const RIVAL1_1_CYNDAQUIL
+	const RIVAL1_1_TOTODILE
+	const RIVAL1_2_CHIKORITA
+	const RIVAL1_2_CYNDAQUIL
+	const RIVAL1_2_TOTODILE
+	const RIVAL1_3_CHIKORITA
+	const RIVAL1_3_CYNDAQUIL
+	const RIVAL1_3_TOTODILE
+	const RIVAL1_4_CHIKORITA
+	const RIVAL1_4_CYNDAQUIL
+	const RIVAL1_4_TOTODILE
+	const RIVAL1_5_CHIKORITA
+	const RIVAL1_5_CYNDAQUIL
+	const RIVAL1_5_TOTODILE
 
 	trainerclass POKEMON_PROF ; a
 
 	trainerclass WILL ; b
+	const WILL1
 
 	trainerclass CAL ; c
 	const CAL1
@@ -51,19 +76,25 @@ KRIS EQU __enum__
 	const CAL3
 
 	trainerclass BRUNO ; d
+	const BRUNO1
 
 	trainerclass KAREN ; e
+	const KAREN1
 
 	trainerclass KOGA ; f
+	const KOGA1
 
 	trainerclass CHAMPION ; 10
 	const LANCE
 
 	trainerclass BROCK ; 11
+	const BROCK1
 
 	trainerclass MISTY ; 12
+	const MISTY1
 
 	trainerclass LT_SURGE ; 13
+	const LT_SURGE1
 
 	trainerclass SCIENTIST ; 14
 	const ROSS
@@ -73,6 +104,7 @@ KRIS EQU __enum__
 	const RICH
 
 	trainerclass ERIKA ; 15
+	const ERIKA1
 
 	trainerclass YOUNGSTER ; 16
 	const JOEY1
@@ -87,8 +119,6 @@ KRIS EQU __enum__
 	const JIMMY
 	const OWEN
 	const JASON
-	const JOEY4
-	const JOEY5
 
 	trainerclass SCHOOLBOY ; 17
 	const JACK1
@@ -153,10 +183,9 @@ KRIS EQU __enum__
 	const CONNIE3
 	const DANA2
 	const DANA3
-	const DANA4
-	const DANA5
 
 	trainerclass JANINE ; 1a
+	const JANINE1
 
 	trainerclass COOLTRAINERM ; 1b
 	const NICK
@@ -178,7 +207,6 @@ KRIS EQU __enum__
 	const KEVIN
 	const STEVE
 	const ALLEN
-	const DARIN
 
 	trainerclass COOLTRAINERF ; 1c
 	const GWEN
@@ -201,7 +229,6 @@ KRIS EQU __enum__
 	const BETH3
 	const REENA2
 	const REENA3
-	const CARA
 
 	trainerclass BEAUTY ; 1d
 	const VICTORIA
@@ -220,7 +247,6 @@ KRIS EQU __enum__
 	const JULIA
 	const THERESA
 	const VALERIE
-	const OLIVIA
 
 	trainerclass POKEMANIAC ; 1e
 	const LARRY
@@ -236,10 +262,39 @@ KRIS EQU __enum__
 	const ISSAC
 	const DONALD
 	const ZACH
-	const BRENT4
-	const MILLER
 
 	trainerclass GRUNTM ; 1f
+	const GRUNTM_1
+	const GRUNTM_2
+	const GRUNTM_3
+	const GRUNTM_4
+	const GRUNTM_5
+	const GRUNTM_6
+	const GRUNTM_7
+	const GRUNTM_8
+	const GRUNTM_9
+	const GRUNTM_10
+	const GRUNTM_11
+	const GRUNTM_12
+	const GRUNTM_13
+	const GRUNTM_14
+	const GRUNTM_15
+	const GRUNTM_16
+	const GRUNTM_17
+	const GRUNTM_18
+	const GRUNTM_19
+	const GRUNTM_20
+	const GRUNTM_21
+	const GRUNTM_22
+	const GRUNTM_23
+	const GRUNTM_24
+	const GRUNTM_25
+	const GRUNTM_26
+	const GRUNTM_27
+	const GRUNTM_28
+	const GRUNTM_29
+	const GRUNTM_30
+	const GRUNTM_31
 
 	trainerclass GENTLEMAN ; 20
 	const PRESTON
@@ -258,6 +313,7 @@ KRIS EQU __enum__
 	const SHIRLEY
 
 	trainerclass SABRINA ; 23
+	const SABRINA1
 
 	trainerclass BUG_CATCHER ; 24
 	const DON
@@ -274,11 +330,6 @@ KRIS EQU __enum__
 	const DOUG
 	const ARNIE2
 	const ARNIE3
-	const WADE4
-	const WADE5
-	const ARNIE4
-	const ARNIE5
-	const WAYNE
 
 	trainerclass FISHER ; 25
 	const JUSTIN
@@ -287,7 +338,7 @@ KRIS EQU __enum__
 	const KYLE
 	const HENRY
 	const MARVIN
-	const TULLY1
+	const CHRIS1
 	const ANDRE
 	const RAYMOND
 	const WILTON1
@@ -298,14 +349,11 @@ KRIS EQU __enum__
 	const BARNEY
 	const RALPH2
 	const RALPH3
-	const TULLY2
-	const TULLY3
+	const CHRIS2
+	const CHRIS3
 	const WILTON2
 	const SCOTT
 	const WILTON3
-	const RALPH4
-	const RALPH5
-	const TULLY4
 
 	trainerclass SWIMMERM ; 26
 	const HAROLD
@@ -364,7 +412,6 @@ KRIS EQU __enum__
 	const HARRY
 	const HUEY2
 	const HUEY3
-	const HUEY4
 
 	trainerclass SUPER_NERD ; 29
 	const STAN
@@ -379,10 +426,14 @@ KRIS EQU __enum__
 	const TERU
 	const RUSS
 	const NORTON
-	const HUGH
-	const MARKUS
 
 	trainerclass RIVAL2 ; 2a
+	const RIVAL2_1_CHIKORITA
+	const RIVAL2_1_CYNDAQUIL
+	const RIVAL2_1_TOTODILE
+	const RIVAL2_2_CHIKORITA
+	const RIVAL2_2_CYNDAQUIL
+	const RIVAL2_2_TOTODILE
 
 	trainerclass GUITARIST ; 2b
 	const CLYDE
@@ -409,12 +460,10 @@ KRIS EQU __enum__
 	const DANIEL
 	const PARRY2
 	const PARRY3
-	const ANTHONY4
-	const ANTHONY5
 
 	trainerclass BIKER ; 2d
-	const BIKER_BENNY
-	const KAZU
+	const KAZU1
+	const KAZU2
 	const DWAYNE
 	const HARRIS
 	const ZEKE
@@ -424,6 +473,7 @@ KRIS EQU __enum__
 	const GLENN
 
 	trainerclass BLAINE ; 2e
+	const BLAINE1
 
 	trainerclass BURGLAR ; 2f
 	const DUNCAN
@@ -446,7 +496,6 @@ KRIS EQU __enum__
 	const HORTON
 	const IRWIN2
 	const IRWIN3
-	const IRWIN4
 
 	trainerclass BLACKBELT_T ; 32
 	const KENJI1
@@ -460,6 +509,10 @@ KRIS EQU __enum__
 	const WAI
 
 	trainerclass EXECUTIVEM ; 33
+	const EXECUTIVEM_1
+	const EXECUTIVEM_2
+	const EXECUTIVEM_3
+	const EXECUTIVEM_4
 
 	trainerclass PSYCHIC_T ; 34
 	const NATHAN
@@ -497,11 +550,6 @@ KRIS EQU __enum__
 	const TANYA
 	const TIFFANY3
 	const ERIN3
-	const LIZ4
-	const LIZ5
-	const GINA4
-	const GINA5
-	const TIFFANY4
 
 	trainerclass CAMPER ; 36
 	const ROLAND
@@ -523,11 +571,10 @@ KRIS EQU __enum__
 	const JOHN
 	const JERRY
 	const SPENCER
-	const TODD4
-	const TODD5
-	const QUENTIN
 
 	trainerclass EXECUTIVEF ; 37
+	const EXECUTIVEF_1
+	const EXECUTIVEF_2
 
 	trainerclass SAGE ; 38
 	const CHOW
@@ -539,9 +586,6 @@ KRIS EQU __enum__
 	const EDMOND
 	const NEAL
 	const LI
-	const GAKU
-	const MASA
-	const KOJI
 
 	trainerclass MEDIUM ; 39
 	const MARTHA
@@ -570,12 +614,10 @@ KRIS EQU __enum__
 	const DEREK2
 	const DEREK3
 	const ALEX
-	const REX
-	const ALLAN
 
 	trainerclass KIMONO_GIRL ; 3c
-	const NAOKO1
-	const NAOKO2
+	const KYOKO
+	const NAOKO
 	const SAYO
 	const ZUKI
 	const KUNI
@@ -590,8 +632,6 @@ KRIS EQU __enum__
 	const JOANDZOE2
 	const MEGANDPEG1
 	const MEGANDPEG2
-	const LEAANDPIA1
-	const LEAANDPIA2
 
 	trainerclass POKEFANF ; 3e
 	const BEVERLY1
@@ -599,46 +639,22 @@ KRIS EQU __enum__
 	const BEVERLY2
 	const BEVERLY3
 	const GEORGIA
-	const JAIME
 
 	trainerclass RED ; 3f
+	const RED1
 
 	trainerclass BLUE ; 40
+	const BLUE1
 
 	trainerclass OFFICER ; 41
 	const KEITH
 	const DIRK
 
 	trainerclass GRUNTF ; 42
+	const GRUNTF_1
+	const GRUNTF_2
+	const GRUNTF_3
+	const GRUNTF_4
+	const GRUNTF_5
 
 NUM_TRAINER_CLASSES EQU __enum__
-
-	const_def
-	const       NO_AI
-const_value = 0
-	shift_const AI_BASIC
-	shift_const AI_SETUP
-	shift_const AI_TYPES
-	shift_const AI_OFFENSIVE
-	shift_const AI_SMART
-	shift_const AI_OPPORTUNIST
-	shift_const AI_AGGRESSIVE
-	shift_const AI_CAUTIOUS
-	shift_const AI_STATUS
-	shift_const AI_RISKY
-	shift_const AI_10
-	shift_const AI_11
-	shift_const AI_12
-	shift_const AI_13
-	shift_const AI_14
-	shift_const AI_15
-
-	const_def
-	const TRNATTR_ITEM1
-	const TRNATTR_ITEM2
-	const TRNATTR_BASEMONEY
-	const TRNATTR_AI_MOVE_WEIGHTS
-	const TRNATTR_AI2
-	const TRNATTR_AI_ITEM_SWITCH
-	const TRNATTR_AI4
-NUM_TRAINER_ATTRIBUTES EQU const_value

@@ -1,3 +1,5 @@
+; InputType: ; c2c7
+AUTO_INPUT EQU $ff
 
 ; MonType: ; cf5f
 PARTYMON   EQU 0
@@ -41,10 +43,15 @@ FACE_LEFT  EQU 2
 FACE_RIGHT EQU 1
 
 ; TimeOfDay: ; d269
-MORN     EQU 0
-DAY      EQU 1
-NITE     EQU 2
-DARKNESS EQU 3
+MORN_F     EQU 0
+DAY_F      EQU 1
+NITE_F     EQU 2
+DARKNESS_F EQU 3
+
+MORN     EQU 1 << MORN_F
+DAY      EQU 1 << DAY_F
+NITE     EQU 1 << NITE_F
+DARKNESS EQU 1 << DARKNESS_F
 
 ; ScriptFlags: ; d434
 SCRIPT_RUNNING EQU 2
@@ -67,15 +74,69 @@ SATURDAY  EQU 6
 ; MapObjects: ; d71e
 
 PLAYER_OBJECT EQU 0
+NUM_OBJECTS   EQU 16
 
-NUM_OBJECTS   EQU $10
+; wStatusFlags::
+        const_def
+        const STATUSFLAGS_POKEDEX_F                  ; 0
+        const STATUSFLAGS_UNOWN_DEX_F                ; 1
+        const STATUSFLAGS_FLASH_F                    ; 2
+        const STATUSFLAGS_CAUGHT_POKERUS_F           ; 3
+        const STATUSFLAGS_ROCKET_SIGNAL_F            ; 4
+        const STATUSFLAGS_NO_WILD_ENCOUNTERS_F       ; 5
+        const STATUSFLAGS_HALL_OF_FAME_F             ; 6
+        const STATUSFLAGS_MAIN_MENU_MOBILE_CHOICES_F ; 7
 
-; InputType: ; c2c7
-AUTO_INPUT EQU $ff
+; wStatusFlags2::
+        const_def
+        const STATUSFLAGS2_ROCKETS_IN_RADIO_TOWER_F ; 0
+        const STATUSFLAGS2_SAFARI_GAME_F            ; 1
+        const STATUSFLAGS2_BUG_CONTEST_TIMER_F      ; 2
+        const STATUSFLAGS2_UNUSED_3_F               ; 3
+        const STATUSFLAGS2_BIKE_SHOP_CALL_F         ; 4
+        const STATUSFLAGS2_UNUSED_5_F               ; 5
+        const STATUSFLAGS2_REACHED_GOLDENROD_F      ; 6
+        const STATUSFLAGS2_ROCKETS_IN_MAHOGANY_F    ; 7
+
+; wJohtoBadges: ; d57c
+	const_def
+	const ZEPHYRBADGE
+	const HIVEBADGE
+	const PLAINBADGE
+	const FOGBADGE
+	const MINERALBADGE
+	const STORMBADGE
+	const GLACIERBADGE
+	const RISINGBADGE
+NUM_JOHTO_BADGES EQU const_value
+
+; wKantoBadges:: ds 1 ; d57d
+	const_def
+	const BOULDERBADGE
+	const CASCADEBADGE
+	const THUNDERBADGE
+	const RAINBOWBADGE
+	const SOULBADGE
+	const MARSHBADGE
+	const VOLCANOBADGE
+	const EARTHBADGE
+NUM_KANTO_BADGES EQU const_value
+NUM_BADGES EQU NUM_JOHTO_BADGES + NUM_KANTO_BADGES
 
 ; WhichRegisteredItem: ; d95b
 REGISTERED_POCKET EQU %11000000
 REGISTERED_NUMBER EQU %00111111
+
+; wDayCareMan:: ; dc40
+DAYCAREMAN_HAS_MON_F         EQU 0
+DAYCAREMAN_MONS_COMPATIBLE_F EQU 5
+DAYCAREMAN_HAS_EGG_F         EQU 6
+
+; wDayCareLady:: ; dc77
+DAYCARELADY_HAS_MON_F        EQU 0
+
+; used with both wDayCareMan and wDayCareLady
+DAYCARE_INTRO_SEEN_F         EQU 7
 
 ; PlayerState: ; d95d
 PLAYER_NORMAL    EQU 0
@@ -83,9 +144,6 @@ PLAYER_BIKE      EQU 1
 PLAYER_SLIP      EQU 2
 PLAYER_SURF      EQU 4
 PLAYER_SURF_PIKA EQU 8
-
-OBJECT_STRUCT_LENGTH EQU 40
-NUM_OBJECT_STRUCTS EQU 13
 
 ; After-Champion Spawn
 SPAWN_LANCE EQU 1

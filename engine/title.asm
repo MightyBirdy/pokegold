@@ -1,7 +1,7 @@
 IntroSequence: ; 6241 (1:6241)
-	callab Copyright_GFPresents
+	callfar Copyright_GFPresents
 	jr c, StartTitleScreen
-	callab GoldSilverIntro
+	callfar GoldSilverIntro
 StartTitleScreen:
 	call InitTitleScreen
 	call DelayFrame
@@ -31,7 +31,7 @@ StartTitleScreen:
 	ld a, [hli]
 	ld h, [hl]
 	ld l, a
-	jp [hl]
+	jp hl
 
 .Jumptable
 	dw MainMenu_
@@ -58,7 +58,7 @@ InitTitleScreen: ; 6291 (1:6291)
 	ld bc, $2000
 	xor a
 	call ByteFill
-	callba ClearAnimatedObjectBuffer
+	farcall ClearAnimatedObjectBuffer
 
 	ld hl, TitleScreenGFX1
 	ld de, $9000
@@ -237,7 +237,7 @@ TitleScreenFrame: ; 63da (1:63da)
 	call Function640f
 	ld a, $1
 	ld [hOAMUpdate], a
-	callba AnimatedObjects_PlayFrame
+	farcall AnimatedObjects_PlayFrame
 	xor a
 	ld [hOAMUpdate], a
 	call Function64b1
@@ -271,7 +271,7 @@ Function640f: ; 640f (1:640f)
 	ld a, [hli]
 	ld h, [hl]
 	ld l, a
-	jp [hl]
+	jp hl
 
 .Jumptable
 	dw Function6426
@@ -341,8 +341,8 @@ Function6434:
 	ld hl, wce63
 	inc [hl]
 	xor a
-	ld [wMusicFadeIDLo], a
-	ld [wMusicFadeIDHi], a
+	ld [wMusicFadeID], a
+	ld [wMusicFadeID + 1], a
 	ld hl, wMusicFade
 	ld [hl], $8
 	ld hl, wce65
@@ -369,11 +369,11 @@ Function648b:
 	ret
 
 DeleteSaveData:
-	callba DeleteSaveData_
+	farcall DeleteSaveData_
 	jp Init
 
 ResetClock:
-	callba ResetClock_
+	farcall ResetClock_
 	jp Init
 
 Function64b1: ; 64b1 (1:64b1)
@@ -425,16 +425,16 @@ ENDC
 Copyright:
 	call ClearTileMap
 	call LoadFontsExtra
-	ld de, TitleScreenGFX5
-	ld hl, $9600
-	lb bc, BANK(TitleScreenGFX5), 30
+	ld de, CopyrightGFX
+	ld hl, vTiles2 tile $60
+	lb bc, BANK(CopyrightGFX), 30
 	call Request2bpp
 	hlcoord 2, 7
 	ld de, CopyrightString
 	jp PlaceString
 
 CopyrightString:
-    db   $60, $61, $62, $63, $7a, $7b, $7c, $7d
+	db   $60, $61, $62, $63, $7a, $7b, $7c, $7d
 	db   $65, $66, $67, $68, $69, $6a
 	next $60, $61, $62, $63, $7a, $7b, $7c, $7d
 	db   $6b, $6c, $6d, $6e, $6f, $70, $71, $72

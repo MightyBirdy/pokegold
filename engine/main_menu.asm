@@ -85,7 +85,7 @@ Function5ae4: ; 5ae4 (1:5ae4)
 	nop
 	nop
 	nop
-	ld a, [wd19a]
+	ld a, [wSaveFileExists]
 	and a
 	jr nz, .asm_5af0
 	ld a, $0
@@ -128,7 +128,7 @@ Function5b0a: ; 5b0a (1:5b0a)
 	ret
 
 Function5b27: ; 5b27 (1:5b27)
-	ld a, [wd19a]
+	ld a, [wSaveFileExists]
 	and a
 	ret z
 	xor a
@@ -152,15 +152,15 @@ Function5b45: ; 5b45 (1:5b45)
 	hlcoord 0, 12
 	ld b, $4
 	ld c, $d
-	call TextBox
+	call Textbox
 	ret
 
 .asm_5b57
-	call SpeechTextBox
+	call SpeechTextbox
 	ret
 
 Function5b5b: ; 5b5b (1:5b5b)
-	ld a, [wd19a]
+	ld a, [wSaveFileExists]
 	and a
 	ret z
 	call CheckRTCStatus
@@ -177,7 +177,7 @@ Function5b5b: ; 5b5b (1:5b5b)
 	decoord 4, 16
 	ld a, [hHours]
 	ld c, a
-	callba PrintHour
+	farcall PrintHour
 	ld [hl], $9c
 	inc hl
 	ld de, hMinutes
@@ -198,7 +198,7 @@ Function5b9c: ; 5b9c (1:5b9c)
 	db "TIME NOT SET@"
 
 .UnusedText
-	text_jump ClockTimeUnknownText_
+	text_far _ClockTimeUnknownText
 	db "@"
 
 Function5bb8: ; 5bb8 (1:5bb8)
@@ -238,12 +238,12 @@ Function5bf7: ; 5bf7 (1:5bf7)
 
 MainMenu_MysteryGift:
 	call UpdateTime
-	callba Function11934
-	callba Function29dff
+	farcall Function11934
+	farcall Function29dff
 	ret
 
 MainMenu_Options:
-	callba OptionsMenu
+	farcall OptionsMenu
 	ret
 
 MainMenu_NewGame:
@@ -266,8 +266,8 @@ Function5c3a: ; 5c3a (1:5c3a)
 	ret
 
 Function5c41: ; 5c41 (1:5c41)
-	ld hl, wOAMBuffer
-	ld bc, wOptions - wOAMBuffer
+	ld hl, wVirtualOAM
+	ld bc, wOptions - wVirtualOAM
 	xor a
 	call ByteFill
 
@@ -292,7 +292,7 @@ Function5c41: ; 5c41 (1:5c41)
 	call Function5d15
 
 	xor a
-	ld [wd8bc], a
+	ld [wCurBox], a
 	ld [wSavedAtLeastOnce], a
 
 	call Function5d1a
@@ -313,16 +313,16 @@ Function5c41: ; 5c41 (1:5c41)
 	call Function5d15
 
 	xor a
-	ld [wdd1a], a
-	ld [wdd21], a
-	ld [wdd28], a
+	ld [wRoamMon1Species], a
+	ld [wRoamMon2Species], a
+	ld [wRoamMon3Species], a
 	ld a, $ff
-	ld [wdd1c], a
-	ld [wdd23], a
-	ld [wdd2a], a
-	ld [wdd1d], a
-	ld [wdd24], a
-	ld [wdd2b], a
+	ld [wRoamMon1MapGroup], a
+	ld [wRoamMon2MapGroup], a
+	ld [wRoamMon3MapGroup], a
+	ld [wRoamMon1MapNumber], a
+	ld [wRoamMon2MapNumber], a
+	ld [wRoamMon3MapNumber], a
 
 	ld a, BANK(s0_abe2)
 	call OpenSRAM
@@ -345,8 +345,6 @@ Function5c41: ; 5c41 (1:5c41)
 	ld [wCoins], a
 	ld [wCoins + 1], a
 
-START_MONEY EQU 3000
-
 IF START_MONEY / $10000
 	ld a, START_MONEY / $10000
 ENDC
@@ -368,9 +366,9 @@ ENDC
 
 	call Function5d5d
 
-	callba InitDecorations
+	farcall InitDecorations
 
-	callba DeletePartyMonMail
+	farcall DeletePartyMonMail
 
 	call ResetGameTime
 	ret
@@ -383,7 +381,7 @@ Function5d15: ; 5d15 (1:5d15)
 	ret
 
 Function5d1a: ; 5d1a (1:5d1a)
-	ld hl, wd8bf
+	ld hl, wBoxNames
 	ld c, $0
 .asm_5d1f
 	push hl
@@ -413,7 +411,7 @@ Function5d1a: ; 5d1a (1:5d1a)
 .Box db "BOX@"
 
 InitializeMagikarpHouse: ; 5d47 (1:5d47)
-	ld hl, wdd33
+	ld hl, wBestMagikarpLengthFeet
 	ld a, 3
 	ld [hli], a
 	ld a, 6
@@ -426,7 +424,7 @@ InitializeMagikarpHouse: ; 5d47 (1:5d47)
 
 Function5d5d: ; 5d5d (1:5d5d)
 	ld hl, .Rival
-	ld de, wRivalsName
+	ld de, wRivalName
 	call .CopyName
 	ld hl, .Mom
 	ld de, wMomsName
@@ -448,8 +446,8 @@ Function5d5d: ; 5d5d (1:5d5d)
 
 InitializeWorld: ; 5d97 (1:5d97)
 	call ShrinkPlayer
-	callba SpawnPlayer
-	callba InitializeStartDay_
+	farcall SpawnPlayer
+	farcall InitializeStartDay_
 	ret
 
 LoadOrRegenerateLuckyIDNumber: ; 5da7 (1:5da7)
@@ -478,7 +476,7 @@ LoadOrRegenerateLuckyIDNumber: ; 5da7 (1:5da7)
 	jp CloseSRAM
 
 MainMenu_Continue:
-	callba TryLoadSaveFile
+	farcall TryLoadSaveFile
 	jr c, .asm_5e41
 	call LoadStandardMenuDataHeader
 	call DisplaySaveInfoOnContinue
@@ -509,9 +507,9 @@ MainMenu_Continue:
 	call ClearTileMap
 	ld c, 20
 	call DelayFrames
-	callba JumpRoamMons
-	callba MysteryGift_CopyReceivedDecosToPC
-	callba ClockContinue
+	farcall JumpRoamMons
+	farcall MysteryGift_CopyReceivedDecosToPC
+	farcall ClockContinue
 	ld a, [wd1db]
 	cp $1
 	jr z, .asm_5e42
@@ -574,7 +572,7 @@ FinishContinueFunction: ; 5e84 (1:5e84)
 	ld [wDontPlayMapMusicOnReload], a
 	ld hl, wGameTimerPause
 	set 0, [hl]
-	callba OverworldLoop
+	farcall OverworldLoop
 	ld a, [wd1db]
 	cp $2
 	jr z, .asm_5e9d
@@ -723,7 +721,7 @@ Continue_DisplayGameTime: ; 5f90 (1:5f90)
 	jp PrintNum
 
 OakSpeech: ; 5fa5 (1:5fa5)
-	callba InitClock ; What time is it?
+	farcall InitClock ; What time is it?
 
 	call RotateFourPalettesLeft
 	call ClearTileMap
@@ -814,36 +812,36 @@ OakSpeech: ; 5fa5 (1:5fa5)
 	ret
 
 OakText1:
-	text_jump OakText1_
+	text_far _OakText1
 	db "@"
 
 OakText2:
-	text_jump OakText2_
-	start_asm
+	text_far _OakText2
+	text_asm
 	ld a, MARILL
-	call PlayCry
+	call PlayMonCry
 	call WaitSFX
 	ld hl, OakText3 ; $606c
 	ret
 
 OakText3:
-	text_jump OakText3_
+	text_far _OakText3
 	db "@"
 
 OakText4:
-	text_jump OakText4_
+	text_far _OakText4
 	db "@"
 
 OakText5:
-	text_jump OakText5_
+	text_far _OakText5
 	db "@"
 
 OakText6:
-	text_jump OakText6_
+	text_far _OakText6
 	db "@"
 
 OakText7:
-	text_jump OakText7_
+	text_far _OakText7
 	db "@"
 
 NamePlayer: ; 6085 (1:6085)
@@ -853,16 +851,16 @@ NamePlayer: ; 6085 (1:6085)
 	ld a, [wMenuCursorY]
 	dec a
 	jr z, .NewName
-	ld de, wPlayersName
+	ld de, wPlayerName
 	call StorePlayerName
-	callba ApplyMonOrTrainerPals
+	farcall ApplyMonOrTrainerPals
 	call MovePlayerPicLeft
 	ret
 
 .NewName
 	ld b, $1
-	ld de, wPlayersName
-	callba NamingScreen
+	ld de, wPlayerName
+	farcall NamingScreen
 	call RotateThreePalettesRight
 	call ClearTileMap
 	call LoadFontsExtra
@@ -875,7 +873,7 @@ NamePlayer: ; 6085 (1:6085)
 	ld b, SCGB_TRAINER_OR_MON_FRONTPIC_PALS
 	call GetSGBLayout
 	call RotateThreePalettesLeft
-	ld hl, wPlayersName
+	ld hl, wPlayerName
 	ld de, .GoldSilver
 	call InitName
 	ret
@@ -931,7 +929,7 @@ ShrinkPlayer: ; 6123 (1:6123)
 	ld a, e
 	ld [wMusicFadeID], a
 	ld a, d
-	ld [wMusicFadeIDHi], a
+	ld [wMusicFadeID + 1], a
 
 	ld de, SFX_ESCAPE_ROPE
 	call PlaySFX
@@ -1053,7 +1051,7 @@ Intro_PrepTrainerPic: ; 61df, 61e0 (1:61df, 1:61e0)
 ShrinkFrame: ; 61f7 (1:61f7)
 	ld de, $9000
 	ld c, $31
-	predef DecompressPredef
+	predef DecompressGet2bpp
 	xor a
 	ld [hGraphicStartTile], a
 	hlcoord 6, 4
@@ -1066,7 +1064,7 @@ Intro_PlacePlayerSprite: ; 6210 (1:6210)
 	lb bc, BANK(PlayerSpriteGFX), 12
 	ld hl, $8000
 	call Request2bpp
-	ld hl, wOAMBuffer
+	ld hl, wVirtualOAM
 	ld de, .OAMData
 	ld a, [de]
 	inc de

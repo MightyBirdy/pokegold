@@ -31,7 +31,7 @@ CheckShininess:
 	and a
 	ret
 
-CheckContestMon: ; 9072 (2:5072)
+Unused_CheckShininess: ; 9072 (2:5072)
 	ld a, [hl]
 	cp $a0
 	jr c, .asm_908c
@@ -252,7 +252,7 @@ ApplyMonOrTrainerPals: ; 91e5 (2:51e5)
 	ld a, e
 	and a
 	jr z, .asm_91f5
-	ld a, [wd004]
+	ld a, [wCurPartySpecies]
 	call Function9be4
 	jr .asm_91fb
 
@@ -268,7 +268,7 @@ ApplyMonOrTrainerPals: ; 91e5 (2:51e5)
 	ret
 
 ApplyHPBarPals:
-	ld a, [wd007]
+	ld a, [wWhichHPBar]
 	and a
 	jr z, .asm_921a
 	cp $1
@@ -301,7 +301,7 @@ ApplyHPBarPals:
 	inc e
 	hlcoord 11, 1, wAttrMap
 	ld bc, 2 * SCREEN_WIDTH
-	ld a, [wd005]
+	ld a, [wCurPartyMon]
 .asm_9241
 	and a
 	jr z, .asm_9248
@@ -634,7 +634,7 @@ Function9b9c: ; 9b9c (2:5b9c)
 
 Function9ba9: ; 9ba9 (2:5ba9)
 	push de
-	callba Function3d8f5
+	farcall Function3d8f5
 	ld c, l
 	ld b, h
 	ld a, [wd0ee]
@@ -644,7 +644,7 @@ Function9ba9: ; 9ba9 (2:5ba9)
 
 Function9bba: ; 9bba (2:5bba)
 	push de
-	callba Function3d907
+	farcall Function3d907
 	ld c, l
 	ld b, h
 	ld a, [wTempEnemyMonSpecies]
@@ -1469,7 +1469,7 @@ Pointers_b6ce:
 	dw .OutdoorColors ; ROUTE
 	dw .IndoorColors ; INDOOR
 	dw .DungeonColors ; CAVE
-	dw .Perm5Colors ; PERM_5
+	dw .Perm5Colors ; ENVIRONMENT_5
 	dw .IndoorColors ; GATE
 	dw .DungeonColors ; DUNGEON
 
@@ -1499,13 +1499,13 @@ Pointers_b6ce:
 	db $18, $19, $1a, $1b, $1c, $1d, $1e, $1f ; dark
 
 TilesetBGPalette: ; b75e
-INCLUDE "tilesets/bg.pal"
+INCLUDE "gfx/tilesets/bg.pal"
 
 MapObjectPals:: ; b8ae
-INCLUDE "tilesets/ob.pal"
+INCLUDE "gfx/tilesets/ob.pal"
 
 RoofPals: ; b9ae
-INCLUDE "tilesets/roof.pal"
+INCLUDE "gfx/tilesets/roof.pal"
 
 Palettes_ba86:
 	RGB 27, 31, 27

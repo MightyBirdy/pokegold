@@ -1,16 +1,20 @@
 PYTHON := python
-MD5 := md5sum -c --quiet
+MD5 := md5sum -c
 
 .SUFFIXES:
 .PHONY: all clean gold silver pngs compare
 .SECONDEXPANSION:
-.PRECIOUS: %.2bpp %.1bpp
+.PRECIOUS:
+.SECONDARY:
 
 gfx       := $(PYTHON) gfx.py
 includes  := $(PYTHON) scan_includes.py
 
 
 rom_obj := \
+audio.o \
+data/text/common.o \
+data/pokemon/dex_entries.o \
 wram.o \
 main.o \
 home.o
@@ -32,20 +36,24 @@ compare: pokegold.gbc pokesilver.gbc
 
 %.asm: ;
 
-%_gold.o: dep = $(shell $(includes) $(@D)/$*.asm)
-%_gold.o: %.asm $$(dep)
+define DEP
+$1: $$(shell $$(includes) $2)
+endef
+$(foreach obj, $(gold_obj), $(eval $(call DEP,$(obj),$(obj:_gold.o=.asm))))
+$(foreach obj, $(silver_obj), $(eval $(call DEP,$(obj),$(obj:_silver.o=.asm))))
+
+$(gold_obj): %_gold.o: %.asm $$(dep)
 	rgbasm -D GOLD -o $@ $<
 
-%_silver.o: dep = $(shell $(includes) $(@D)/$*.asm)
-%_silver.o: %.asm $$(dep)
+$(silver_obj): %_silver.o: %.asm $$(dep)
 	rgbasm -D SILVER -o $@ $<
 
 pokegold.gbc: $(gold_obj)
-	rgblink -n pokegold.sym -m pokegold.map -o $@ $^
+	rgblink -n pokegold.sym -m pokegold.map -l pokegold.link -o $@ $^
 	rgbfix -cjsv -i AAUE -k 01 -l 0x33 -m 0x10 -p 0 -r 3 -t "POKEMON_GLD" $@
 
 pokesilver.gbc: $(silver_obj)
-	rgblink -n pokesilver.sym -m pokesilver.map -o $@ $^
+	rgblink -n pokesilver.sym -m pokesilver.map -l pokesilver.link -o $@ $^
 	rgbfix -cjsv -i AAXE -k 01 -l 0x33 -m 0x10 -p 0 -r 3 -t "POKEMON_SLV" $@
 
 pngs:

@@ -1,15 +1,16 @@
-INCLUDE "includes.asm"
+INCLUDE "contents.asm"
+INCLUDE "constants.asm"
 
 ; rst vectors
-INCLUDE "rst.asm"
-INCLUDE "interrupts.asm"
+INCLUDE "home/rst.asm"
+INCLUDE "home/interrupts.asm"
 
-SECTION "start", HOME[$100]
+SECTION "start", ROM0
 Start::
 	nop
 	jp _Start
 
-SECTION "bank0", HOME[$150]
+SECTION "bank0", ROM0
 INCLUDE "home/vblank.asm"
 INCLUDE "home/delay.asm"
 INCLUDE "home/rtc.asm"
@@ -160,7 +161,7 @@ Function2ffe:: ; 2ffe (0:2ffe)
 	push de
 	push bc
 	ld d, $0
-	predef FlagPredef
+	predef SmallFarFlagAction
 	pop bc
 	pop de
 .next
@@ -185,14 +186,14 @@ INCLUDE "home/random.asm"
 INCLUDE "home/sram.asm"
 
 jp_hl::
-	jp [hl]
+	jp hl
 
 jp_de::
 	push de
 	ret
 
 ClearSprites:: ; 30ff (0:30ff)
-	ld hl, wOAMBuffer
+	ld hl, wVirtualOAM
 	ld b, $a0
 	xor a
 .asm_3105
@@ -202,7 +203,7 @@ ClearSprites:: ; 30ff (0:30ff)
 	ret
 
 HideSprites::
-	ld hl, wOAMBuffer
+	ld hl, wVirtualOAM
 	ld de, $4
 	ld b, $28
 	ld a, $a0
@@ -270,7 +271,7 @@ Function31e2:: ; 31e2 (0:31e2)
 	ld a, [wOptions]
 	bit 4, a
 	ret nz
-	ld a, [wTextBoxFlags]
+	ld a, [wTextboxFlags]
 	bit 1, a
 	ret z
 	push hl
@@ -280,7 +281,7 @@ Function31e2:: ; 31e2 (0:31e2)
 	ld a, [hl]
 	push af
 	ld [hl], a
-	ld a, [wTextBoxFlags]
+	ld a, [wTextboxFlags]
 	bit 0, a
 	jr z, .asm_3205
 	ld a, [wOptions]
@@ -729,7 +730,7 @@ Function3456:: ; 3456 (0:3456)
 	call DelayFrames
 	ret
 
-CheckCGB::
+IsCGB::
 	ld a, [hCGB]
 	and a
 	ret
@@ -873,7 +874,7 @@ GetSGBLayout:: ; 3583 (0:3583)
 	and a
 	ret z
 .asm_358c
-	predef_jump Predef_LoadSGBLayout
+	predef_jump LoadSGBLayout
 
 SetHPPal::
 	call GetHPPal
@@ -1025,14 +1026,14 @@ GetPokemonName:: ; 367e (0:367e)
 	ld hl, PokemonNames
 	ld e, a
 	ld d, $0
-rept PKMN_NAME_LENGTH +- 1
+rept MON_NAME_LENGTH +- 1
 	add hl, de
 endr
 	ld de, wStringBuffer1
 	push de
-	ld bc, PKMN_NAME_LENGTH - 1
+	ld bc, MON_NAME_LENGTH - 1
 	call CopyBytes
-	ld hl, wStringBuffer1 + PKMN_NAME_LENGTH - 1
+	ld hl, wStringBuffer1 + MON_NAME_LENGTH - 1
 	ld [hl], "@"
 	pop de
 	pop hl
@@ -1082,7 +1083,7 @@ GetTMHMName:: ; 36cc (0:36cc)
 	push de
 	ld a, [wd151]
 	ld c, a
-	callab GetTMHMNumber
+	callfar GetTMHMNumber
 	pop de
 	pop af
 	ld a, c
@@ -1184,7 +1185,7 @@ DrawScrollingMenu::
 	push de
 	call Coord2Tile
 	pop bc
-	jp TextBox
+	jp Textbox
 
 ScrollingMenuJoyTextDelay::
 	call DelayFrame
@@ -1230,7 +1231,7 @@ StoneQueueWarpAction:: ; 37b9 (0:37b9)
 	call IsThisObjectInTheStoneTable
 	jr nc, .asm_37dc
 	call CallMapScript
-	callba EnableScriptMode
+	farcall EnableScriptMode
 	scf
 	ret
 
@@ -1600,7 +1601,7 @@ PrepMonFrontpic::
 	ld a, $1
 	ld [wcf3b], a
 PrepMonFrontpic_::
-	ld a, [wd004]
+	ld a, [wCurPartySpecies]
 	and a
 	jr z, .not_pokemon
 	cp EGG
@@ -1610,7 +1611,7 @@ PrepMonFrontpic_::
 .egg
 	push hl
 	ld de, $9000
-	predef GetFrontpic
+	predef GetMonFrontpic
 	pop hl
 	xor a
 	ld [hGraphicStartTile], a
@@ -1624,7 +1625,7 @@ PrepMonFrontpic_::
 	xor a
 	ld [wcf3b], a
 	inc a
-	ld [wd004], a
+	ld [wCurPartySpecies], a
 	ret
 
 INCLUDE "home/cry.asm"
@@ -1704,7 +1705,7 @@ GetBaseData::
 	ret
 
 GetCurNick::
-	ld a, [wd005]
+	ld a, [wCurPartyMon]
 	ld hl, wPartyMon1Nickname
 GetNick::
 	push hl
@@ -1715,7 +1716,7 @@ GetNick::
 	ld bc, $b
 	call CopyBytes
 	pop de
-	callab CheckNickErrors
+	callfar CheckNickErrors
 	pop bc
 	pop hl
 	ret
@@ -1790,7 +1791,7 @@ GetPartyParamLocation::
 	ld c, a
 	ld b, $0
 	add hl, bc
-	ld a, [wd005]
+	ld a, [wCurPartyMon]
 	call GetPartyLocation
 	pop bc
 	ret

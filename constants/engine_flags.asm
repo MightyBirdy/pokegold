@@ -6,10 +6,10 @@
 	engine_flag_def ENGINE_EXPN_CARD,                             wPokegearFlags, 3 ; expn card
 	engine_flag_def ENGINE_POKEGEAR,                              wPokegearFlags, 7 ; on/off
 
-	engine_flag_def ENGINE_DAYCARE_MAN_HAS_EGG,                   wDayCareMan, 6 ; egg is ready
-	engine_flag_def ENGINE_DAYCARE_MAN_HAS_MON,                   wDayCareMan, 0 ; monster 1 in daycare
+	engine_flag_def ENGINE_DAY_CARE_MAN_HAS_EGG,                  wDayCareMan, DAYCAREMAN_HAS_EGG_F
+	engine_flag_def ENGINE_DAY_CARE_MAN_HAS_MON,                  wDayCareMan, DAYCAREMAN_HAS_MON_F
 
-	engine_flag_def ENGINE_DAYCARE_LADY_HAS_MON,                  wDaycareLady, 0 ; monster 2 in daycare
+	engine_flag_def ENGINE_DAY_CARE_LADY_HAS_MON,                 wDayCareLady, DAYCARELADY_HAS_MON_F
 
 	engine_flag_def ENGINE_MOM_SAVING_MONEY,                      wMomSavingMoney, 0 ; mom saving money ; $8
 	engine_flag_def ENGINE_DST,                                   wMomSavingMoney, 7 ; dst
@@ -26,7 +26,7 @@
 	engine_flag_def ENGINE_ROCKETS_IN_RADIO_TOWER,                wStatusFlags2, 0 ; rockets in radio tower
 	engine_flag_def ENGINE_BIKE_SHOP_CALL_ENABLED,                wStatusFlags2, 4 ; bike shop call enabled (1024 bike steps reqd)
 	engine_flag_def ENGINE_GIVE_POKERUS,                          wStatusFlags2, 5 ; give pokerus
-	engine_flag_def ENGINE_FLORIA,                                wStatusFlags2, 6 ; berry -> berry juice when trading?
+	engine_flag_def ENGINE_REACHED_GOLDENROD,                     wStatusFlags2, 6 ; berry -> berry juice when trading?
 	engine_flag_def ENGINE_ROCKETS_IN_MAHOGANY,                   wStatusFlags2, 7 ; rockets in mahogany
 
 	engine_flag_def ENGINE_STRENGTH_ACTIVE,                       wBikeFlags, 0 ; strength active
@@ -51,16 +51,16 @@
 	engine_flag_def ENGINE_VOLCANOBADGE,                          wKantoBadges, 6 ; volcanobadge ; $28
 	engine_flag_def ENGINE_EARTHBADGE,                            wKantoBadges, 7 ; earthbadge
 
-	engine_flag_def ENGINE_UNLOCKED_UNOWNS_1,                     wUnlockedUnowns, 0
-	engine_flag_def ENGINE_UNLOCKED_UNOWNS_2,                     wUnlockedUnowns, 1
-	engine_flag_def ENGINE_UNLOCKED_UNOWNS_3,                     wUnlockedUnowns, 2
-	engine_flag_def ENGINE_UNLOCKED_UNOWNS_4,                     wUnlockedUnowns, 3
-	engine_flag_def ENGINE_UNLOCKED_UNOWNS_5,                     wUnlockedUnowns, 4
-	engine_flag_def ENGINE_UNLOCKED_UNOWNS_6,                     wUnlockedUnowns, 5
-	engine_flag_def ENGINE_UNLOCKED_UNOWNS_7,                     wUnlockedUnowns, 6   ; $30
-	engine_flag_def ENGINE_UNLOCKED_UNOWNS_8,                     wUnlockedUnowns, 7
+	engine_flag_def ENGINE_UNLOCKED_UNOWNS_A_TO_K,                wUnlockedUnowns, 0
+	engine_flag_def ENGINE_UNLOCKED_UNOWNS_L_TO_R,                wUnlockedUnowns, 1
+	engine_flag_def ENGINE_UNLOCKED_UNOWNS_S_TO_W,                wUnlockedUnowns, 2
+	engine_flag_def ENGINE_UNLOCKED_UNOWNS_X_TO_Z,                wUnlockedUnowns, 3
+	engine_flag_def ENGINE_UNLOCKED_UNOWNS_UNUSED_4,              wUnlockedUnowns, 4
+	engine_flag_def ENGINE_UNLOCKED_UNOWNS_UNUSED_5,              wUnlockedUnowns, 5
+	engine_flag_def ENGINE_UNLOCKED_UNOWNS_UNUSED_6,              wUnlockedUnowns, 6   ; $30
+	engine_flag_def ENGINE_UNLOCKED_UNOWNS_UNUSED_7,              wUnlockedUnowns, 7
 
-	engine_flag_def ENGINE_FLYPOINT_KRISS_HOUSE,                  wVisitedSpawns,     0 ; your house
+	engine_flag_def ENGINE_FLYPOINT_PLAYERS_HOUSE,                wVisitedSpawns,     0 ; your house
 	engine_flag_def ENGINE_FLYPOINT_VIRIDIAN_POKECENTER,          wVisitedSpawns,     1 ; viridian pokecenter
 	engine_flag_def ENGINE_FLYPOINT_PALLET,                       wVisitedSpawns,     2 ; pallet
 	engine_flag_def ENGINE_FLYPOINT_VIRIDIAN,                     wVisitedSpawns,     3 ; viridian
@@ -97,14 +97,14 @@
 	engine_flag_def ENGINE_SPECIAL_WILDDATA,                      wDailyFlags, 2 ; special wilddata?
 	engine_flag_def ENGINE_TIME_CAPSULE,                          wDailyFlags, 3 ; time capsule (24h wait)
 	engine_flag_def ENGINE_ALL_FRUIT_TREES,                       wDailyFlags, 4 ; all fruit trees
-	engine_flag_def ENGINE_SHUCKLE_GIVEN,                         wDailyFlags, 5 ; shuckle given
+	engine_flag_def ENGINE_GOT_SHUCKIE_TODAY,                     wDailyFlags, 5 ; shuckle given
 	engine_flag_def ENGINE_GOLDENROD_UNDERGROUND_MERCHANT_CLOSED, wDailyFlags, 6 ; goldenrod underground merchant closed
 	engine_flag_def ENGINE_FOUGHT_IN_TRAINER_HALL_TODAY,          wDailyFlags, 7 ; fought in trainer hall today
 
 	engine_flag_def ENGINE_MT_MOON_SQUARE_CLEFAIRY,               wWeeklyFlags, 0 ; mt moon square clefairy
 	engine_flag_def ENGINE_UNION_CAVE_LAPRAS,                     wWeeklyFlags, 1 ; union cave lapras  ; $58
 	engine_flag_def ENGINE_GOLDENROD_UNDERGROUND_GOT_HAIRCUT,     wWeeklyFlags, 2 ; goldenrod underground haircut used
-	engine_flag_def ENGINE_GOLDENROD_MALL_5F_HAPPINESS_EVENT,     wWeeklyFlags, 3 ; goldenrod mall happiness event floor05 person07
-	engine_flag_def ENGINE_TEA_IN_BLUES_HOUSE,                    wWeeklyFlags, 4 ; tea in blues house
+	engine_flag_def ENGINE_GOLDENROD_DEPT_STORE_TM27_RETURN,     wWeeklyFlags, 3 ; goldenrod mall happiness event floor05 person07
+	engine_flag_def ENGINE_DAISYS_GROOMING,                    wWeeklyFlags, 4 ; tea in blues house
 	engine_flag_def ENGINE_INDIGO_PLATEAU_RIVAL_FIGHT,            wWeeklyFlags, 5 ; indigo plateau rival fight
 NUM_ENGINE_FLAGS EQU const_value

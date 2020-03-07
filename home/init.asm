@@ -1,5 +1,5 @@
 Reset:: ; 5b0 (0:05b0)
-	call DisableAudio
+	call MapSetup_Sound_Off
 	xor a
 	ld [hMapAnims], a
 	call ClearPalettes
@@ -47,7 +47,7 @@ Init:: ; 5d1 (0:05d1)
 	ld [rLCDC], a
 
 ; Clear WRAM
-	ld hl, wc000
+	ld hl, wMusicPlaying
 	ld bc, $2000
 .ByteFill
 	ld [hl], $0
@@ -101,14 +101,14 @@ Init:: ; 5d1 (0:05d1)
 	ld h, $9c
 	call BlankBGMap
 
-	callab InitCGBPals
+	callfar InitCGBPals
 
 	ld a, $9c
 	ld [hBGMapAddress + 1], a
 	xor a
 	ld [hBGMapAddress], a
 
-	callba StartClock
+	farcall StartClock
 
 	ld a, SRAM_ENABLE
 	ld [MBC3SRamEnable], a
@@ -136,7 +136,7 @@ Init:: ; 5d1 (0:05d1)
 	ld a, $30
 	call Predef
 
-	call DisableAudio
+	call MapSetup_Sound_Off
 	xor a
 	ld [wMapMusic], a
 	jp GameInit

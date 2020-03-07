@@ -1,6 +1,6 @@
 LearnMove:
 	call BackUpTilesToBuffer
-	ld a, [wd005]
+	ld a, [wCurPartyMon]
 	ld hl, wPartyMon1Nickname
 	call GetNick
 	ld hl, wStringBuffer1
@@ -10,7 +10,7 @@ LearnMove:
 .loop
 	ld hl, wPartyMon1Moves
 	ld bc, $30
-	ld a, [wd005]
+	ld a, [wCurPartyMon]
 	call AddNTimes
 	ld d, h
 	ld e, l
@@ -64,7 +64,7 @@ LearnMove:
 	ld a, [wBattleMode]
 	and a
 	jp z, .LearnedMove
-	ld a, [wd005]
+	ld a, [wCurPartyMon]
 	ld b, a
 	ld a, [wCurBattleMon]
 	cp b
@@ -121,7 +121,7 @@ LearnMove:
 	hlcoord 5, 2
 	ld b, $8
 	ld c, $d
-	call TextBox
+	call Textbox
 	hlcoord 7, 4
 	ld a, $28
 	ld [wBuffer1], a
@@ -182,28 +182,28 @@ LearnMove:
 	ret
 
 Text_LearnedMove:
-	text_jump Text_LearnedMove_
+	text_far Text_LearnedMove_
 	db "@"
 
 Text_ForgetWhich:
-	text_jump Text_ForgetWhich_
+	text_far Text_ForgetWhich_
 	db "@"
 
 Text_StopLearning:
-	text_jump Text_StopLearning_
+	text_far Text_StopLearning_
 	db "@"
 
 Text_DidNotLearn:
-	text_jump Text_DidNotLearn_
+	text_far Text_DidNotLearn_
 	db "@"
 
 Text_TryingToLearn:
-	text_jump Text_TryingToLearn_
+	text_far Text_TryingToLearn_
 	db "@"
 
 Text_1_2_and_Poof:
-	text_jump Text_1_2_and_Poof_
-	start_asm
+	text_far Text_1_2_and_Poof_
+	text_asm
 	push de
 	ld de, SFX_SWITCH_POKEMON
 	call PlaySFX
@@ -212,9 +212,9 @@ Text_1_2_and_Poof:
 	ret
 
 .PoofForgot:
-	text_jump Text_PoofForgot_
+	text_far Text_PoofForgot_
 	db "@"
 
 Text_CantForgetHM:
-	text_jump Text_CantForgetHM_
+	text_far Text_CantForgetHM_
 	db "@"

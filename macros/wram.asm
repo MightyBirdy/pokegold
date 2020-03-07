@@ -109,7 +109,7 @@ box: MACRO
 \1Mon1::            box_struct \1Mon1
 \1Mon2::            ds BOXMON_STRUCT_LENGTH * (MONS_PER_BOX +- 1)
 \1MonOT::           ds NAME_LENGTH * MONS_PER_BOX
-\1MonNicknames::    ds PKMN_NAME_LENGTH * MONS_PER_BOX
+\1MonNicknames::    ds MON_NAME_LENGTH * MONS_PER_BOX
 \1MonNicknamesEnd::
 \1End::             ds 2 ; padding
 ENDM
@@ -119,7 +119,7 @@ channel_struct: MACRO
 ; Addreses are Channel1 (c101).
 \1MusicID::           dw
 \1MusicBank::         db
-\1Flags::             db ; 0:on/off 1:subroutine 3:sfx 4:noise 5:rest
+\1Flags1::            db ; 0:on/off 1:subroutine 3:sfx 4:noise 5:rest
 \1Flags2::            db ; 0:vibrato on/off 2:duty 4:cry pitch
 \1Flags3::            db ; 0:vibrato up/down
 \1MusicAddress::      dw
@@ -129,14 +129,12 @@ channel_struct: MACRO
 \1Condition::         db ; conditional jumps
 \1DutyCycle::         db ; bits 6-7 (0:12.5% 1:25% 2:50% 3:75%)
 \1Intensity::         db ; hi:pressure lo:velocity
-\1Frequency:: ; 11 bits
-\1FrequencyLo::       db
-\1FrequencyHi::       db
+\1Frequency::         dw ; 11 bits
 \1Pitch::             db ; 0:rest 1-c:note
 \1Octave::            db ; 7-0 (0 is highest)
-\1StartingOctave::    db ; raises existing octaves (to repeat phrases)
+\1PitchOffset::       db ; raises existing octaves (to repeat phrases)
 \1NoteDuration::      db ; frames remaining for the current note
-\1Field0x16::         ds 1 ; c117
+\1Field16::           ds 1 ; c117
                       ds 1 ; c118
 \1LoopCount::         db
 \1Tempo::             dw
@@ -149,16 +147,16 @@ channel_struct: MACRO
 \1PitchWheelTarget::  dw ; frequency endpoint for pitch wheel
 \1PitchWheelAmount::  db ; c124
 \1PitchWheelAmountFraction::   db ; c125
-\1Field0x25::         ds 1 ; c126
+\1Field25::           ds 1 ; c126
                       ds 1 ; c127
 \1CryPitch::          dw
-\1Field0x29::         ds 1
-\1Field0x2a::         ds 2
-\1Field0x2c::         ds 1
+\1Field29::           ds 1
+\1Field2a::           ds 2
+\1Field2c::           ds 1
 \1NoteLength::        db ; frames per 16th note
-\1Field0x2e::         ds 1 ; c12f
-\1Field0x2f::         ds 1 ; c130
-\1Field0x30::         ds 1 ; c131
+\1Field2e::           ds 1 ; c12f
+\1Field2f::           ds 1 ; c130
+\1Field30::           ds 1 ; c131
                       ds 1 ; c132
 ENDM
 
@@ -178,7 +176,7 @@ hof_mon: MACRO
 \1ID:: ds 2
 \1DVs:: ds 2
 \1Level:: ds 1
-\1Nickname:: ds PKMN_NAME_LENGTH +- 1
+\1Nickname:: ds MON_NAME_LENGTH +- 1
 \1End::
 endm
 
@@ -211,13 +209,12 @@ ENDM
 
 trademon: MACRO
 \1Species:: ds 1 ; wc6d0 | wc702
-\1SpeciesName:: ds PKMN_NAME_LENGTH ; wc6d1 | wc703
-\1Nickname:: ds PKMN_NAME_LENGTH ; wc6dc | wc70e
+\1SpeciesName:: ds MON_NAME_LENGTH ; wc6d1 | wc703
+\1Nickname:: ds MON_NAME_LENGTH ; wc6dc | wc70e
 \1SenderName:: ds NAME_LENGTH ; wc6e7 | wc719
 \1OTName:: ds NAME_LENGTH ; wc6f2 | wc724
 \1DVs:: ds 2 ; wc6fd | wc72f
 \1ID:: ds 2 ; wc6ff | wc731
-\1CaughtData:: ds 1 ; wc701 | wc733
 \1End::
 ENDM
 
@@ -287,7 +284,6 @@ object_struct: MACRO
 ENDM
 
 map_object: MACRO
-\1Object::
 \1ObjectStructID::  ds 1
 \1ObjectSprite::    ds 1
 \1ObjectYCoord::    ds 1
@@ -301,7 +297,20 @@ map_object: MACRO
 \1ObjectScript::    ds 2
 \1ObjectEventFlag:: ds 2
 	ds 2
-endm
+ENDM
+
+sprite_oam_struct: MACRO
+\1YCoord::     db
+\1XCoord::     db
+\1TileID::     db
+\1Attributes:: db
+; bit 7: priority
+; bit 6: y flip
+; bit 5: x flip
+; bit 4: pal # (non-cgb)
+; bit 3: vram bank (cgb only)
+; bit 2-0: pal # (cgb only)
+ENDM
 
 sprite_anim_struct: MACRO
 \1Index:: ds 1          ; 0

@@ -22,7 +22,7 @@ Function10456: ; 10456 (4:4456)
 	ld a, [wce63]
 	ld hl, .Jumptable ; $4460
 	call Function10c9b
-	jp [hl]
+	jp hl
 
 .Jumptable
 	dw Pack_InitGFX
@@ -115,13 +115,13 @@ Pack_InitTMHMPocket:
 	ret
 
 Pack_TMHMPocketMenu:
-	callba Pack_TMHMPocketMenu_
+	farcall Pack_TMHMPocketMenu_
 	ld b, $5
 	ld c, $1
 	call Function10cef
 	ret c
-	callba CheckTossableItem_
-	ld a, [wd03f]
+	farcall CheckTossableItem_
+	ld a, [wItemAttributeParamBuffer]
 	and a
 	jr nz, .asm_1053a
 	ld hl, TMHMPocketSubmenuDataHeader_Give ; $456b
@@ -141,7 +141,7 @@ Pack_TMHMPocketMenu:
 	ld a, [wMenuCursorY]
 	dec a
 	call Function10c9b
-	jp [hl]
+	jp hl
 
 TMHMPocketSubmenuDataHeader_NoGive:
 	db $40
@@ -180,15 +180,15 @@ TMHMPocketSubmenuJumptable_Give:
 	dw QuitItemSubmenu
 
 UseTMorHM:
-	callba AskTeachTMHM
+	farcall AskTeachTMHM
 	ret c
-	callba ChooseMonToLearnTMHM
+	farcall ChooseMonToLearnTMHM
 	jr c, .asm_105a9
 	ld hl, wOptions
 	ld a, [hl]
 	push af
 	res 4, [hl]
-	callba TeachTMHM
+	farcall TeachTMHM
 	pop af
 	ld [wOptions], a
 .asm_105a9
@@ -228,30 +228,30 @@ Pack_BallsPocketMenu:
 	ret
 
 Function105f5: ; 105f5 (4:45f5)
-	callba CheckTossableItem_
-	ld a, [wd03f]
+	farcall CheckTossableItem_
+	ld a, [wItemAttributeParamBuffer]
 	and a
 	jr nz, .asm_10629
-	callba CheckSelectableItem
-	ld a, [wd03f]
+	farcall CheckSelectableItem
+	ld a, [wItemAttributeParamBuffer]
 	and a
 	jr nz, .asm_1061b
-	callba CheckItemMenu
-	ld a, [wd03f]
+	farcall CheckItemMenu
+	ld a, [wItemAttributeParamBuffer]
 	and a
 	jr nz, .asm_10637
 	jr .asm_10657
 
 .asm_1061b
-	callba CheckItemMenu
-	ld a, [wd03f]
+	farcall CheckItemMenu
+	ld a, [wItemAttributeParamBuffer]
 	and a
 	jr nz, .asm_1063f
 	jr .asm_1065f
 
 .asm_10629
-	callba CheckSelectableItem
-	ld a, [wd03f]
+	farcall CheckSelectableItem
+	ld a, [wItemAttributeParamBuffer]
 	and a
 	jr nz, .asm_10647
 	jr .asm_1064f
@@ -294,7 +294,7 @@ Function105f5: ; 105f5 (4:45f5)
 	ld a, [wMenuCursorY]
 	dec a
 	call Function10c9b
-	jp [hl]
+	jp hl
 
 ItemSubmenuDataHeader_UseGiveTossSelQuit:
 	db $40 ; flags
@@ -417,8 +417,8 @@ ItemSubmenuJumptable_GiveTossQuit:
 	dw QuitItemSubmenu
 
 UseItem:
-	callba CheckItemMenu
-	ld a, [wd03f]
+	farcall CheckItemMenu
+	ld a, [wItemAttributeParamBuffer]
 	ld hl, .Jumptable
 	rst JumpTable
 	ret
@@ -470,7 +470,7 @@ UseItem:
 TossMenu:
 	ld hl, Text_ThrowAwayHowMany
 	call Function10cb9
-	callba SelectQuantityToToss ; 9:4f20
+	farcall SelectQuantityToToss ; 9:4f20
 	push af
 	call ExitMenu
 	pop af
@@ -521,8 +521,8 @@ Function107cd:
 	ret
 
 RegisterItem:
-	callba CheckSelectableItem
-	ld a, [wd03f]
+	farcall CheckSelectableItem
+	ld a, [wItemAttributeParamBuffer]
 	and a
 	jr nz, .asm_10826
 	ld a, [wce65]
@@ -534,9 +534,9 @@ RegisterItem:
 	inc a
 	and $3f
 	or b
-	ld [wd680], a
+	ld [wWhichRegisteredItem], a
 	ld a, [wd002]
-	ld [wd681], a
+	ld [wRegisteredItem], a
 	call Function10e38
 	ld de, SFX_FULL_HEAL
 	call WaitPlaySFX
@@ -558,20 +558,20 @@ GiveItem:
 	res 4, a
 	ld [wOptions], a
 	ld a, $8
-	ld [wd03e], a
+	ld [wPartyMenuActionText], a
 	call ClearBGPalettes
-	callba LoadPartyMenuGFX
-	callba InitPartyMenuWithCancel
-	callba InitPartyMenuGFX
+	farcall LoadPartyMenuGFX
+	farcall InitPartyMenuWithCancel
+	farcall InitPartyMenuGFX
 .asm_10857
-	callba WritePartyMenuTilemap
-	callba PrintPartyMenuText
+	farcall WritePartyMenuTilemap
+	farcall PrintPartyMenuText
 	call WaitBGMap
 	call SetPalettes
 	call DelayFrame
-	callba PartyMenuSelect
+	farcall PartyMenuSelect
 	jr c, .asm_108a5
-	ld a, [wd004]
+	ld a, [wCurPartySpecies]
 	cp EGG
 	jr nz, .asm_10883
 	ld hl, Text_AnEggCantHoldAnItem
@@ -609,7 +609,7 @@ Function108b6: ; 108b6 (4:48b6)
 	ret
 
 Text_AnEggCantHoldAnItem:
-	text_jump Text_AnEggCantHoldAnItem_
+	text_far Text_AnEGGCantHoldAnItem
 	db "@"
 
 QuitItemSubmenu:
@@ -639,7 +639,7 @@ Function108e9: ; 108e9 (4:48e9)
 	ld a, [wce63]
 	ld hl, .Jumptable
 	call Function10c9b
-	jp [hl]
+	jp hl
 
 .Jumptable
 	dw BattlePack_InitGFX
@@ -733,7 +733,7 @@ BattlePack_InitTMHMPocket:
 	ret
 
 BattlePack_TMHMPocketMenu:
-	callba Pack_TMHMPocketMenu_ ; b:457a
+	farcall Pack_TMHMPocketMenu_ ; b:457a
 	ld b, $5
 	ld c, $1
 	call Function10cef
@@ -771,8 +771,8 @@ BattlePack_BallsPocketMenu:
 	ret
 
 Function10a03: ; 10a03 (4:4a03)
-	callba CheckItemContext
-	ld a, [wd03f]
+	farcall CheckItemContext
+	ld a, [wItemAttributeParamBuffer]
 Function10a0c: ; 10a0c (4:4a0c)
 	and a
 	jr z, .asm_10a17
@@ -793,7 +793,7 @@ Function10a0c: ; 10a0c (4:4a0c)
 	ld a, [wMenuCursorY]
 	dec a
 	call Function10c9b
-	jp [hl]
+	jp hl
 
 BattlePackUseQuitMenuDataHeader:
 	db $40 ; flags
@@ -828,8 +828,8 @@ BattlePackQuitJumptable:
 	dw BattlePack_QuitSubmenu
 
 BattlePack_UseItem:
-	callba CheckItemContext
-	ld a, [wd03f]
+	farcall CheckItemContext
+	ld a, [wItemAttributeParamBuffer]
 	ld hl, $4a67
 	rst JumpTable
 	ret
@@ -928,7 +928,7 @@ Function10af7: ; 10af7 (4:4af7)
 	ld a, [wce63]
 	ld hl, .Jumptable
 	call Function10c9b
-	jp [hl]
+	jp hl
 
 .Jumptable
 	dw DepositOrSell_ItemPocket
@@ -972,7 +972,7 @@ DepositOrSell_TMHMPocket:
 	ld a, $3
 	call Function10b92
 	call Function10cca
-	callba Pack_TMHMPocketMenu_ ; b:457a
+	farcall Pack_TMHMPocketMenu_ ; b:457a
 	ld a, [wd002]
 	ld [wd002], a
 	ret
@@ -1058,7 +1058,7 @@ TutorialPack:
 	ld a, [wInputType]
 	or a
 	jr z, .asm_10bfa
-	callba DudeAutoInput_RightA ; 70:4dee
+	farcall DudeAutoInput_RightA ; 70:4dee
 .asm_10bfa
 	call Function10c07
 	call Function10b9f
@@ -1071,7 +1071,7 @@ Function10c07: ; 10c07 (4:4c07)
 	ld a, [wce63]
 	ld hl, $4c11
 	call Function10c9b
-	jp [hl]
+	jp hl
 
 .Jumptable
 	dw TutorialItems
@@ -1125,7 +1125,7 @@ TutorialTMHM:
 	ld a, $3
 	call Function10b92
 	call Function10cca
-	callba Pack_TMHMPocketMenu_
+	farcall Pack_TMHMPocketMenu_
 	ld a, [wd002]
 	ld [wd002], a
 	ret
@@ -1278,7 +1278,7 @@ Function10cef: ; 10cef (4:4cef)
 	ret
 
 .asm_10d3e
-	callba SwitchItemsInBag ; 9:4834
+	farcall SwitchItemsInBag ; 9:4834
 	ld hl, Text_MoveItemWhere
 	call Function10cb9
 	scf
@@ -1295,7 +1295,7 @@ Function10cef: ; 10cef (4:4cef)
 	ret
 
 .asm_10d58
-	callba SwitchItemsInBag ; 9:4834
+	farcall SwitchItemsInBag ; 9:4834
 	ld de, SFX_SWITCH_POKEMON
 	call WaitPlaySFX
 	ld de, SFX_SWITCH_POKEMON
@@ -1335,7 +1335,7 @@ Function10d70: ; 10d70 (4:4d70)
 	call Function10dc0
 	hlcoord 0, 12
 	ld bc, IncGradGBPalTable_13
-	call TextBox
+	call Textbox
 	call EnableLCD
 	call Function10ccd
 	ret
@@ -1525,47 +1525,47 @@ PC_Mart_BallsPocketMenuDataHeader:
 	dba UpdateItemDescription ; 9:43eb
 
 Text_PackNoItems:
-	text_jump Text_PackNoItems_
+	text_far Text_PackNoItems_
 	db "@"
 
 Text_ThrowAwayHowMany:
-	text_jump Text_ThrowAwayHowMany_
+	text_far Text_ThrowAwayHowMany_
 	db "@"
 
 Text_ConfirmThrowAway:
-	text_jump Text_ConfirmThrowAway_
+	text_far Text_ConfirmThrowAway_
 	db "@"
 
 Text_ThrewAway:
-	text_jump Text_ThrewAway_
+	text_far Text_ThrewAway_
 	db "@"
 
 Text_ThisIsntTheTime:
-	text_jump Text_ThisIsntTheTime_
+	text_far Text_ThisIsntTheTime_
 	db "@"
 
 Text_YouDontHaveAPokemon:
-	text_jump Text_YouDontHaveAPokemon_
+	text_far Text_YouDontHaveAMon
 	db "@"
 
 Text_RegisteredTheItem:
-	text_jump Text_RegisteredTheItem_
+	text_far Text_RegisteredTheItem_
 	db "@"
 
 Text_CantRegisterThatItem:
-	text_jump Text_CantRegisterThatItem_
+	text_far Text_CantRegisterThatItem_
 	db "@"
 
 Text_MoveItemWhere:
-	text_jump Text_MoveItemWhere_
+	text_far Text_MoveItemWhere_
 	db "@"
 
 Text_PackEmptyString:
-	text_jump Text_PackEmptyString_
+	text_far Text_PackEmptyString_
 	db "@"
 
 Text_CantUseItInABattle:
-	text_jump Text_CantUseItInABattle_
+	text_far Text_YouCantUseItInABattle
 	db "@"
 
 PackMenuGFX: INCBIN "gfx/misc/pack_menu.2bpp"

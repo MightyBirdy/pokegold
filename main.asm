@@ -1,29 +1,12 @@
-INCLUDE "includes.asm"
+INCLUDE "contents.asm"
+INCLUDE "constants.asm"
 
-SECTION "bank1", ROMX, BANK[$1]
-PlaceWaitingText:: ; 4000 (1:4000)
-	hlcoord 3, 10
-	ld b, $1
-	ld c, $b
-	ld a, [wBattleMode]
-	and a
-	jr z, .asm_4012
-	call TextBox
-	jr .asm_4017
 
-.asm_4012
-	predef Predef_LinkTextbox
-.asm_4017
-	hlcoord 4, 11
-	ld de, .Waiting
-	call PlaceString
-	ld c, 50
-	jp DelayFrames
+SECTION "bank1", ROMX
 
-.Waiting:
-	db "Waiting...!@"
+INCLUDE "engine/link/place_waiting_text.asm"
 
-Predef1:
+DummyPredef1:
 	ret
 
 LoadPushOAM:: ; 4032 (1:4032)
@@ -39,7 +22,7 @@ LoadPushOAM:: ; 4032 (1:4032)
 	ret
 
 PushOAM:
-	ld a, wOAMBuffer / $100
+	ld a, wVirtualOAM / $100
 	ld [rDMA], a
 	ld a, $28
 .asm_4046
@@ -49,7 +32,7 @@ PushOAM:
 
 PushOAMEnd
 
-INCLUDE "engine/map_objects.asm"
+INCLUDE "engine/overworld/map_objects.asm"
 INCLUDE "engine/main_menu.asm"
 INCLUDE "engine/title.asm"
 
@@ -150,7 +133,7 @@ INCLUDE "engine/learn.asm"
 CheckNickErrors:: ; 677e (1:677e)
 	push bc
 	push de
-	ld b, PKMN_NAME_LENGTH
+	ld b, MON_NAME_LENGTH
 .checkchar
 	ld a, [de]
 	cp "@"
@@ -204,9 +187,10 @@ CheckNickErrors:: ; 677e (1:677e)
 INCLUDE "engine/math.asm"
 ItemAttributes:
 INCLUDE "items/item_attributes.asm"
-INCLUDE "engine/npc_movement.asm"
-INCLUDE "event/happiness_egg.asm"
-INCLUDE "event/special.asm"
+INCLUDE "engine/overworld/npc_movement.asm"
+INCLUDE "engine/events/happiness_egg.asm"
+INCLUDE "engine/events/shuckle.asm"
+INCLUDE "engine/events/haircut.asm"
 
 SECTION "bank2", ROMX, BANK[$2]
 SwapTextboxPalettes::
@@ -314,14 +298,14 @@ ScrollBGMapPalettes:: ; 804f (2:404f)
 	jr nz, .asm_8055
 	ret
 
-INCLUDE "tilesets/palette_maps.asm"
+INCLUDE "gfx/tilesets/palette_maps.asm"
 
 Unknown85d7:
-	rept NUM_MAP_GROUPS
+	rept 26 ; NUM_MAP_GROUPS
 	db PAL_BG_ROOF
 	endr
 
-INCLUDE "engine/player_object.asm"
+INCLUDE "engine/overworld/player_object.asm"
 INCLUDE "engine/sine.asm"
 INCLUDE "engine/predef.asm"
 INCLUDE "engine/color.asm"
@@ -339,11 +323,11 @@ CheckTime::
 	ld c, a
 	ret
 
-TimeOfDayTable: ; c012
-	db MORN, 1 << MORN
-	db DAY,  1 << DAY
-	db NITE, 1 << NITE
-	db NITE, 1 << NITE
+TimeOfDayTable:
+	db MORN_F, MORN
+	db DAY_F,  DAY
+	db NITE_F, NITE
+	db NITE_F, NITE
 	db -1
 
 INCLUDE "engine/engine_flags.asm"
@@ -352,7 +336,7 @@ INCLUDE "engine/specials.asm"
 
 Functionc660:
 	nop
-FlagPredef:
+SmallFarFlagAction:
 	push hl
 	push bc
 	push bc
@@ -407,19 +391,19 @@ FlagPredef:
 	ret
 
 INCLUDE "engine/health.asm"
-INCLUDE "event/overworld.asm"
+INCLUDE "engine/events/overworld.asm"
 INCLUDE "engine/items.asm"
-INCLUDE "engine/player_step.asm"
+INCLUDE "engine/overworld/player_step.asm"
 INCLUDE "engine/anim_hp_bar.asm"
 INCLUDE "engine/move_mon.asm"
 INCLUDE "engine/billspctop.asm"
 
-Functione673: ; e673 (3:6673)
+GetBreedMon1LevelGrowth:
 	ld hl, wBreedMon1Species
 	ld de, wTempMonSpecies
 	ld bc, $20
 	call CopyBytes
-	callab CalcLevel
+	callfar CalcLevel
 	ld a, [wBreedMon1Level]
 	ld b, a
 	ld a, d
@@ -428,12 +412,12 @@ Functione673: ; e673 (3:6673)
 	ld d, a
 	ret
 
-Functione68e: ; e68e (3:668e)
+GetBreedMon2LevelGrowth:
 	ld hl, wBreedMon2Species
 	ld de, wTempMon
 	ld bc, $20
 	call CopyBytes
-	callab CalcLevel
+	callfar CalcLevel
 	ld a, [wBreedMon2Level]
 	ld b, a
 	ld a, d
@@ -572,8 +556,8 @@ BugContest_SetCaughtContestMon:
 	and a
 	jr z, .asm_e76e
 	ld [wd151], a
-	callba DisplayAlreadyCaughtText
-	callba DisplayCaughtContestMonStats
+	farcall DisplayAlreadyCaughtText
+	farcall DisplayCaughtContestMonStats
 	lb bc, 14, 7
 	call PlaceYesNoBox
 	ret c
@@ -589,7 +573,7 @@ BugContest_SetCaughtContestMon:
 GenerateBugContestMonStats: ; e781 (3:6781)
 	ld a, [wTempEnemyMonSpecies]
 	ld [wCurSpecies], a
-	ld [wd004], a
+	ld [wCurPartySpecies], a
 	call GetBaseData
 	xor a
 	ld bc, PARTYMON_STRUCT_LENGTH
@@ -602,7 +586,7 @@ GenerateBugContestMonStats: ; e781 (3:6781)
 
 Text_CaughtBugMon:
 	; Caught @ !
-	text_jump Text_CaughtBugMon_
+	text_far Text_CaughtBugMon_
 	db "@"
 
 INCLUDE "items/item_effects.asm"
@@ -629,22 +613,20 @@ KnowsMove:
 	ret
 
 Text_KnowsMove:
-	text_jump Text_KnowsMove_
+	text_far Text_KnowsMove_
 	db "@"
 
 SECTION "bank4", ROMX, BANK[$4]
 
-INCLUDE "engine/player_movement.asm"
+INCLUDE "engine/overworld/player_movement.asm"
 INCLUDE "engine/pack.asm"
-INCLUDE "engine/time.asm"
+INCLUDE "engine/overworld/time.asm"
 INCLUDE "engine/learn_tm.asm"
 INCLUDE "engine/namingscreen.asm"
-
-AbortBugCatchingContest::
-	dr $1269a, $126fd
-Function126fd:
-	dr $126fd, $12947
-
+INCLUDE "engine/events/misc_scripts.asm"
+INCLUDE "engine/events/heal_machine_anim.asm"
+INCLUDE "engine/events/whiteout.asm"
+INCLUDE "engine/events/forced_movement.asm"
 ItemfinderFunction:
 	dr $12947, $12e33
 
@@ -652,17 +634,18 @@ PartyMonItemName::
 	dr $12e33, $12fa0
 Function12fa0:
 	dr $12fa0, $1399d
-Function1399d:
-	dr $1399d, $13a5f
+INCLUDE "engine/events/bug_contest/contest.asm"
+INCLUDE "engine/events/misc_scripts_2.asm"
+INCLUDE "engine/events/std_collision.asm"
 Function13a5f:
 	dr $13a5f, $13d44
 ApplyPokerusTick:
 	dr $13d44, $13d64
-Function13d64:
+SelectRandomBugContestContestants:
 	dr $13d64, $13dce
-Function13dce:
+ContestDropOffMons:
 	dr $13dce, $13ded
-Function13ded:
+ContestReturnMons:
 	dr $13ded, $13e03
 
 SECTION "bank5", ROMX, BANK[$5]
@@ -683,7 +666,7 @@ Function1415c:: ; 1415c
 	dr $1415c, $1416d
 Function1416d:: ; 1416d
 	dr $1416d, $14226
-Function14226:
+LoadUsedSpritesGFX:
 	dr $14226, $14317
 DoesSpriteHaveFacings_:: ; 14317
 	dr $14317, $14334
@@ -707,27 +690,29 @@ DelayLoadingNewSprites:
 	dr $1560c, $15612
 Function15612:: ; 15612
 	dr $15612, $15871
-Function15871:
+PokemonCenterPC:
 	dr $15871, $159b0
 Function159b0:
-	dr $159b0, $1646d
-Function1646d:
+	dr $159b0, $1624f
+TakeMoney:
+	dr $1624f, $16260
+CompareMoney:
+	dr $16260, $1646d
+BankOfMom:
 	dr $1646d, $16935
-Function16935:
-	dr $16935, $16989
-Function16989:
-	dr $16989, $16b8c
-Function16b8c:
-	dr $16b8c, $16e3a
+
+INCLUDE "engine/events/daycare.asm"
 Function16e3a:
 	dr $16e3a, $16ff7
-Function16ff7:
+PhotoStudio:
 	dr $16ff7, $171d1
-Function171d1:
-	dr $171d1, $177a5
-Function177a5:
+CheckBreedmonCompatibility:
+	dr $171d1, $17467
+InitEggMoves:
+	dr $17467, $177a5
+DayCareMon1:
 	dr $177a5, $177c4
-Function177c4:
+DayCareMon2:
 	dr $177c4, $1783e
 
 SECTION "bank6", ROMX, BANK[$6]
@@ -735,7 +720,7 @@ SECTION "bank6", ROMX, BANK[$6]
 
 SECTION "bank7", ROMX, BANK[$7]
 LoadMapGroupRoof::
-	dr $1c000, $1ffbd
+	dr $1c000, $1f84c
 
 SECTION "bank8", ROMX, BANK[$8]
 	dr $20000, $23e3d
@@ -767,35 +752,36 @@ PlaceMenuItemName:
 	dr $249dc, $249eb
 PlaceMenuItemQuantity:
 	dr $249eb, $24a10
-Function24a10:
+PlaceMoneyTopRight:
 	dr $24a10, $24a4d
-Function24a4d:
+DisplayCoinCaseBalance:
 	dr $24a4d, $24a76
-Function24a76:
+DisplayMoneyAndCoinBalance:
 	dr $24a76, $24b8d
 Function24b8d:
 	dr $24b8d, $24f20
 SelectQuantityToToss:
 	dr $24f20, $267ca
-Function267ca:
+ProfOaksPCBoot:
 	dr $267ca, $2692d
 InitDecorations: ; 2692d
 	dr $2692d, $270d5
 ReceiveDecorationC:
 	dr $270d5, $271be
-Function271be:
+ToggleMaptileDecorations:
 	dr $271be, $27216
-Function27216:
+ToggleDecorationsVisibility:
 	dr $27216, $27271
-GetTrainerDVs:
-	dr $27271, $27307
+
+INCLUDE "engine/battle/read_trainer_dvs.asm"
+
 ReturnToBattle_UseBall_:
 	dr $27307, $27bd3
 
 SECTION "banka", ROMX, BANK[$a]
 	dr $28000, $28d88
 
-Predef_LinkTextbox::
+LinkTextboxAtHL::
 	dr $28d88, $28dea
 
 TradeAnimation::
@@ -803,60 +789,60 @@ TradeAnimation::
 
 TradeAnimationPlayer2::
 	dr $28e22, $29a47
-Function29a47:
+CheckTimeCapsuleCompatibility:
 	dr $29a47, $29ac7
-Function29ac7:
+EnterTimeCapsule:
 	dr $29ac7, $29ad9
-Function29ad9:
+WaitForOtherPlayerToExit:
 	dr $29ad9, $29b22
-Function29b22:
+SetBitsForLinkTradeRequest:
 	dr $29b22, $29b2b
-Function29b2b:
+SetBitsForBattleRequest:
 	dr $29b2b, $29b34
-Function29b34:
+SetBitsForTimeCapsuleRequest:
 	dr $29b34, $29b4b
-Function29b4b:
+WaitForLinkedFriend:
 	dr $29b4b, $29bcc
-Function29bcc:
+CheckLinkTimeout:
 	dr $29bcc, $29c71
-Function29c71:
+TryQuickSave:
 	dr $29c71, $29c8d
-Function29c8d:
+CheckBothSelectedSameRoom:
 	dr $29c8d, $29cba
-Function29cba:
+TimeCapsule:
 	dr $29cba, $29ccf
-Function29ccf:
+TradeCenter:
 	dr $29ccf, $29ce4
-Function29ce4:
+Colosseum:
 	dr $29ce4, $29cf9
-Function29cf9:
+CloseLink:
 	dr $29cf9, $29d01
-Function29d01:
+FailedLinkToPast:
 	dr $29d01, $29d4e
-Function29d4e:
+CableClubCheckWhichChris:
 	dr $29d4e, $29dff
 Function29dff:
 	dr $29dff, $2a4bf
 MysteryGift_CopyReceivedDecosToPC:
 	dr $2a4bf, $2a4e7
-Function2a4e7:
+UnlockMysteryGift:
 	dr $2a4e7, $2a4f6
 Function2a4f6:
 	dr $2a4f6, $2a7d7
-Function2a7d7:
+InitRoamMons:
 	dr $2a7d7, $2a8e0
 JumpRoamMons:
 	dr $2a8e0, $2a9f7
-Function2a9f7:
+RandomUnseenWildMon:
 	dr $2a9f7, $2aa6b
-Function2aa6b:
+RandomPhoneWildMon:
 	dr $2aa6b, $2aab3
-Function2aab3:
+RandomPhoneMon:
 	dr $2aab3, $2c000
 
 SECTION "bankb", ROMX, BANK[$b]
 	dr $2c000, $2c352
-Function2c352:
+MoveDeletion:
 	dr $2c352, $2c57a
 
 Pack_TMHMPocketMenu_:
@@ -902,7 +888,9 @@ SECTION "banke", ROMX, BANK[$e]
 	dr $38000, $398f2
 
 Battle_GetTrainerName:: ; 398f2
-	dr $398f2, $3c000
+	dr $398f2, $3993e
+
+INCLUDE "data/trainers/parties.asm"
 
 SECTION "bankf", ROMX, BANK[$f]
 	dr $3c000, $3c551
@@ -910,7 +898,7 @@ SECTION "bankf", ROMX, BANK[$f]
 FleeMons::
 	dr $3c551, $3d70a
 
-CheckPlayerPartyForFitPkmn::
+CheckPlayerPartyForFitMon::
 	dr $3d70a, $3d8f5
 
 Function3d8f5:
@@ -933,10 +921,10 @@ BattleRandom_:: ; 3ec11
 FillInExpBar::
 	dr $3f196, $3f243
 
-GetMonBackpic::
+GetBattleMonBackpic::
 	dr $3f243, $3f282
 
-GetMonFrontpic::
+GetEnemyMonFrontpic::
 	dr $3f282, $3f2c7
 
 StartBattle::
@@ -988,8 +976,11 @@ SECTION "bank13", ROMX, BANK[$13]
 	dr $4c000, $50000
 
 SECTION "bank14", ROMX, BANK[$14]
-Function50000:
-	dr $50000, $5004f
+SelectMonFromParty:
+	dr $50000, $5001d
+
+SelectTradeOrDayCareMon:
+	dr $5001d, $5004f
 
 LoadPartyMenuGFX:
 	dr $5004f, $5005f
@@ -1027,7 +1018,7 @@ BasementKeyFunction:
 SacredAshFunction:
 	dr $50819, $5087d
 
-CopyPkmnToTempMon::
+CopyMonToTempMon::
 	dr $5087d, $50940
 
 PrintMonTypes::
@@ -1060,7 +1051,7 @@ GetGender::
 ListMovePP::
 	dr $51364, $513e4
 
-Predef22::
+Unused_PlaceEnemyHPLevel::
 	dr $513e4, $51437
 
 PlaceNonFaintStatus::
@@ -1078,22 +1069,26 @@ CalcExpAtLevel:
 GetUnownLetter::
 	dr $51749, $51780
 
-GetFrontpic::
+GetMonFrontpic::
 	dr $51780, $51786
 
 FrontpicPredef::
 	dr $51786, $51803
 
-GetBackpic::
+GetMonBackpic::
 	dr $51803, $518a0
 
 GetTrainerPic::
 	dr $518a0, $518fa
 
-DecompressPredef::
+DecompressGet2bpp::
 	dr $518fa, $51b0b
-BaseData:: ; 51b0b
-	dr $51b0b, $53a83
+
+INCLUDE "data/pokemon/base_stats.asm"
+
+Unknown53a6b:
+	dr $53a6b, $53a83
+
 UnknownEggPic:: ; 53a83
 	dr $53a83, $54000
 
@@ -1154,8 +1149,8 @@ ResetClock_:
 DeleteSaveData_:
 	dr $8c310, $8c355
 
-Predef35::
-Predef36::
+DummyPredef35::
+DummyPredef36::
 	ret
 
 UpdateTimeOfDayPal:: ; 8c356
@@ -1170,19 +1165,19 @@ _UpdateTimePals:: ; 8c397
 FadeInPalettes:: ; 8c3a0
 	dr $8c3a0, $8c3ab
 
-Function8c3ab:: ; 8c3ab
+FadeOutPalettes:: ; 8c3ab
 	dr $8c3ab, $8c3b9
 
-Function8c3b9:
+FadeInQuickly:
 	dr $8c3b9, $8c3c4
 
-Function8c3c4:
+FadeBlackQuickly:
 	dr $8c3c4, $8c3e9
 
 Function8c3e9:: ; 8c3e9
 	dr $8c3e9, $8c513
 
-Predef_StartBattle::
+DoBattleTransition::
 	dr $8c513, $8ca5e
 
 PlayWhirlpoolSound:
@@ -1203,7 +1198,7 @@ FlyFromAnimation:
 FlyToAnimation:
 	dr $8cdab, $8ce7c
 
-Function8ce7c:
+MagnetTrain:
 	dr $8ce7c, $8d174
 
 ClearAnimatedObjectBuffer:
@@ -1238,13 +1233,13 @@ SECTION "bank24", ROMX, BANK[$24]
 	dr $90000, $90641
 InitClock:
 	dr $90641, $908dc
-Function908dc:
+SetDayOfWeek:
 	dr $908dc, $90a1b
-Function90a1b:
+InitialSetDSTFlag:
 	dr $90a1b, $90a54
-Function90a54:
+InitialClearDSTFlag:
 	dr $90a54, $90a8d
-Function90a8d:
+MrChrono:
 	dr $90a8d, $90b0f
 PrintHour:
 	dr $90b0f, $9188a
@@ -1255,7 +1250,7 @@ Function919c1:
 TownMap_:
 	dr $91a4f, $91c7f
 
-Area_::
+Pokedex_GetArea::
 	dr $91c7f, $92c36
 Function92c36:
 	dr $92c36, $94000
@@ -1264,8 +1259,8 @@ SECTION "bank25", ROMX, BANK[$25]
 MapTriggers:: ; 94000
 	dr $94000, $940ed
 
-MapGroupPointers::
-	dr $940ed, $965f9
+INCLUDE "data/maps/maps.asm"
+INCLUDE "data/maps/attributes.asm"
 
 OverworldLoop::
 	dr $965f9, $96b89
@@ -1313,14 +1308,7 @@ SECTION "bank28", ROMX, BANK[$28]
 SECTION "bank29", ROMX, BANK[$29]
 	dr $a4000, $a8000
 
-SECTION "bank2a", ROMX, BANK[$2a]
-	dr $a8000, $ac000
-
-SECTION "bank2b", ROMX, BANK[$2b]
-	dr $ac000, $b0000
-
-SECTION "bank2c", ROMX, BANK[$2c]
-	dr $b0000, $b4000
+INCLUDE "data/maps/blocks.asm"
 
 SECTION "bank2d", ROMX, BANK[$2d]
 	dr $b4000, $b8000
@@ -1332,7 +1320,10 @@ TreeMonEncounter:
 	dr $ba378, $ba3a1
 
 RockMonEncounter:
-	dr $ba3a1, $bc000
+	dr $ba3a1, $bbaed
+
+ItemIsMail:
+	dr $bbaed, $bc000
 
 SECTION "bank2f", ROMX, BANK[$2f]
 	dr $bc000, $c0000
@@ -1351,21 +1342,22 @@ SECTION "bank31", ROMX, BANK[$31]
 	dr $c4000, $c7a40
 Functionc7a40:
 	dr $c7a40, $c7a5a
-Functionc7a5a:
+CheckForLuckyNumberWinners:
 	dr $c7a5a, $c7bad
-Functionc7bad:
+PrintTodaysLuckyNumber:
 	dr $c7bad, $c7bbf
-Functionc7bbf:
+CheckPartyFullAfterContest:
 	dr $c7bbf, $c7cd0
 Functionc7cd0:
 	dr $c7cd0, $c8000
 
 SECTION "bank32", ROMX, BANK[$32]
-BattleAnimations:: ; Not actually where it is, I just needed the label for BANK to work
 	dr $c8000, $c80d6
 
-Predef2F::
-	dr $c80d6, $cbc76
+DummyPredef2F::
+	dr $c80d6, $c900a
+
+INCLUDE "data/moves/animations.asm"
 
 LoadPoisonBGPals::
 	dr $cbc76, $cc000
@@ -1377,15 +1369,15 @@ DisplayCaughtContestMonStats:
 DisplayAlreadyCaughtText:
 	dr $cc0c8, $cc0d6
 
-Predef38::
-Predef39::
+DummyPredef38::
+DummyPredef39::
 	ret
 
 PlayBattleAnim::
 	dr $cc0d7, $cc283
 
 BattleAnimCommands::
-	dr $cc283, $d0000
+	dr $cc283, $cfce3
 
 SECTION "bank34", ROMX, BANK[$34]
 	dr $d0000, $d4000
@@ -1395,9 +1387,6 @@ SECTION "bank35", ROMX, BANK[$35]
 
 SECTION "bank36", ROMX, BANK[$36]
 	dr $d8000, $dc000
-
-SECTION "bank37", ROMX, BANK[$37]
-	dr $dc000, $e0000
 
 SECTION "bank38", ROMX, BANK[$38]
 	dr $e0000, $e0002
@@ -1423,59 +1412,39 @@ ChangeBox_:
 	dr $e3d25, $e4000
 
 SECTION "bank39", ROMX, BANK[$39]
-TitleScreenGFX5:
-	dr $e4000, $e41e0
-TitleScreenGFX3:
+
+CopyrightGFX:
+	INCBIN "gfx/intro/copyright.2bpp"
+
 IF DEF(GOLD)
+TitleScreenGFX3:
 	dr $e41e0, $e4260
 TitleScreenGFX4:
 	dr $e4260, $e4608
 OptionsMenu:
 	dr $e4608, $e49a8
-Copyright_GFPresents:
-	dr $e49a8, $e4cb1
-GoldSilverIntro:
-	dr $e4cb1, $e8000
 ENDC
 
 IF DEF(SILVER)
+TitleScreenGFX3:
 	dr $e41e0, $e4220
 TitleScreenGFX4:
 	dr $e4220, $e4450
 OptionsMenu:
 	dr $e4450, $e47f0
-Copyright_GFPresents:
-	dr $e47f0, $e4af9
+ENDC
+
+INCLUDE "engine/movie/gamefreak_presents.asm"
+
+IF DEF(GOLD)
+GoldSilverIntro:
+	dr $e4cb1, $e8000
+ENDC
+
+IF DEF(SILVER)
 GoldSilverIntro:
 	dr $e4af9, $e8000
 ENDC
-
-SECTION "bank3a", ROMX, BANK[$3a]
-DisableAudio_::
-	dr $e8000, $e805c
-
-UpdateSound_::
-	dr $e805c, $e8b30
-
-PlayMusic_::
-	dr $e8b30, $e8b79
-
-PlayCryHeader_::
-	dr $e8b79, $e8c04
-
-PlaySFX_::
-	dr $e8c04, $ec000
-
-SECTION "bank3b", ROMX, BANK[$3b]
-	dr $ec000, $f0000
-
-SECTION "bank3c", ROMX, BANK[$3c]
-	dr $f0000, $f2747
-CryHeaders::
-	dr $f2747, $f4000
-
-SECTION "bank3d", ROMX, BANK[$3d]
-	dr $f4000, $f8000
 
 SECTION "bank3e", ROMX, BANK[$3e]
 Functionf8000::
@@ -1491,9 +1460,9 @@ Shrink1Pic:
 	dr $fb5be, $fb64e
 Shrink2Pic:
 	dr $fb64e, $fb7f7
-Functionfb7f7:
+_NameRater:
 	dr $fb7f7, $fb94b
-Functionfb94b:
+PlaySlowCry:
 	dr $fb94b, $fb981
 NewPokedexEntry:
 	dr $fb981, $fba12
@@ -1502,498 +1471,27 @@ ConvertMon_1to2::
 	dr $fba12, $fbb22
 UpdateUnownDex:
 	dr $fbb22, $fbc3c
-Functionfbc3c:
+CheckMagikarpLength:
 	dr $fbc3c, $fbdd6
-Functionfbdd6:
+MagikarpHouseSign:
 	dr $fbdd6, $fc000
 
 SECTION "bank3f", ROMX, BANK[$3f]
 	nop
-Predef3A::
+DummyPredef3A::
 	ret
 
 	dr $fc002, $100000
 
 SECTION "bank40", ROMX, BANK[$40]
-BattleText:: ; Not actually where it is, I just needed the label for BANK to work
-	dr $100000, $101746
+	dr $100000, $10110c
 
-Text_ConfusedNoMore::
-	dr $101746, $104000
+INCLUDE "data/text/battle.asm"
 
 SECTION "bank41", ROMX, BANK[$41]
 	dr $104000, $108000
 
-SECTION "bank42", ROMX, BANK[$42]
-	dr $108000, $10c000
-
-SECTION "bank43", ROMX, BANK[$43]
-	dr $10c000, $110000
-
-SECTION "bank44", ROMX, BANK[$44]
-	dr $110000, $114000
-
-SECTION "bank45", ROMX, BANK[$45]
-	dr $114000, $118000
-
-SECTION "bank46", ROMX, BANK[$46]
-	dr $118000, $11c000
-
-SECTION "bank47", ROMX, BANK[$47]
-	dr $11c000, $120000
-
-SECTION "bank48", ROMX, BANK[$48]
-	dr $120000, $124000
-
-SECTION "bank49", ROMX, BANK[$49]
-	dr $124000, $128000
-
-SECTION "bank4a", ROMX, BANK[$4a]
-	dr $128000, $12c000
-
-SECTION "bank4b", ROMX, BANK[$4b]
-	dr $12c000, $130000
-
-SECTION "bank4c", ROMX, BANK[$4c]
-	dr $130000, $134000
-
-SECTION "bank4d", ROMX, BANK[$4d]
-	dr $134000, $138000
-
-SECTION "bank4e", ROMX, BANK[$4e]
-	dr $138000, $13c000
-
-SECTION "bank4f", ROMX, BANK[$4f]
-	dr $13c000, $140000
-
-SECTION "bank50", ROMX, BANK[$50]
-	dr $140000, $144000
-
-SECTION "bank51", ROMX, BANK[$51]
-	dr $144000, $148000
-
-SECTION "bank52", ROMX, BANK[$52]
-	dr $148000, $14c000
-
-SECTION "bank53", ROMX, BANK[$53]
-	dr $14c000, $150000
-
-SECTION "bank54", ROMX, BANK[$54]
-	dr $150000, $154000
-
-SECTION "bank55", ROMX, BANK[$55]
-	dr $154000, $158000
-
-SECTION "bank56", ROMX, BANK[$56]
-	dr $158000, $15c000
-
-SECTION "bank57", ROMX, BANK[$57]
-	dr $15c000, $160000
-
-SECTION "bank58", ROMX, BANK[$58]
-	dr $160000, $164000
-
-SECTION "bank59", ROMX, BANK[$59]
-	dr $164000, $168000
-
-SECTION "bank5a", ROMX, BANK[$5a]
-	dr $168000, $16c000
-
-SECTION "bank5b", ROMX, BANK[$5b]
-	dr $16c000, $170000
-
-SECTION "bank5c", ROMX, BANK[$5c]
-	dr $170000, $174000
-
-SECTION "bank5d", ROMX, BANK[$5d]
-	dr $174000, $178000
-
-SECTION "bank5e", ROMX, BANK[$5e]
-	dr $178000, $17c000
-
-SECTION "bank5f", ROMX, BANK[$5f]
-	dr $17c000, $180000
-
-SECTION "bank60", ROMX, BANK[$60]
-	dr $180000, $184000
-
-SECTION "bank61", ROMX, BANK[$61]
-	dr $184000, $188000
-
-SECTION "bank62", ROMX, BANK[$62]
-	dr $188000, $18c000
-
-SECTION "bank63", ROMX, BANK[$63]
-	dr $18c000, $190000
-
-SECTION "bank64", ROMX, BANK[$64]
-	dr $190000, $190ef3
-ReceivedMysteryGiftText_::
-	dr $190ef3, $190f0b
-NoCoinsText_::
-	dr $190f0b, $190f1f
-NoCoinCaseText_::
-	dr $190f1f, $1920ad
-BadgeRequiredText_::
-	dr $1920ad, $1920ce
-CantUseFieldMoveHereText_::
-	dr $1920ce, $1920e3
-Text_UsedCut_::
-	dr $1920e3, $1920f2
-Text_NothingToCut_::
-	dr $1920f2, $19210f
-Text_UsedFlash_::
-	dr $19210f, $192135
-UsedSurfText_::
-	dr $192135, $194000
-
-SECTION "bank65", ROMX, BANK[$65]
-CantSurfText_::
-	dr $194000, $194015
-
-AlreadySurfingText_::
-	dr $194015, $19402d
-
-AskSurfText_::
-	dr $19402d, $19404f
-
-Text_UsedWaterfall_::
-	dr $19404f, $194064
-
-Text_CantDoWaterfall_::
-	dr $194064, $194080
-
-Text_AskUseWaterfall_::
-	dr $194080, $19409f
-
-Text_UsedDig_::
-	dr $19409f, $1940ae
-
-Text_UsedEscapeRope_::
-	dr $1940ae, $1940c6
-
-Text_CantUseDigEscapeRopeHere_::
-	dr $1940c6, $1940db
-
-Text_ReturnToLastMonCenter_::
-	dr $1940db, $1940fc
-
-Text_CantUseTeleportHere_::
-	dr $1940fc, $194112
-
-Text_AlreadyUsingStrength_::
-	dr $194112, $194135
-
-Text_UsedStrength_::
-	dr $194135, $194149
-
-Text_AllowedToMoveBoulders_::
-	dr $194149, $194161
-
-Text_AskStrength_::
-	dr $194161, $194199
-
-Text_BouldersMayNowBeMoved_::
-	dr $194199, $1941b5
-
-Text_MonMayBeAbleToMove_::
-	dr $1941b5, $1941d7
-
-Text_UsedWhirlpool_::
-	dr $1941d7, $1941ec
-
-Text_MightyWhirlpool_::
-	dr $1941ec, $194225
-
-Text_AskWhirlpool_::
-	dr $194225, $194258
-
-Text_DidAHeadbutt_::
-	dr $194258, $19426d
-
-Text_NothingFromHeadbutt_::
-	dr $19426d, $19427d
-
-Text_AskHeadbutt_::
-	dr $19427d, $1942b1
-
-Text_UsedRockSmash_::
-	dr $1942b1, $1942c7
-
-Text_MayBeBreakable_::
-	dr $1942c7, $1942e8
-
-Text_AskRockSmash_::
-	dr $1942e8, $19431c
-
-Text_OhABite_::
-	dr $19431c, $194329
-
-Text_NotEvenANibble_::
-	dr $194329, $19433d
-
-Text_NothingHereToFish_::
-	dr $19433d, $19435e
-
-Text_CantGetOffBike_::
-	dr $19435e, $194376
-
-Text_GotOnTheBike_::
-	dr $194376, $19438b
-
-Text_GotOffTheBike_::
-	dr $19438b, $1943a1
-
-Text_AskCut_::
-	dr $1943a1, $1943c9
-
-Text_MonCanCutThis_::
-	dr $1943c9, $194543
-
-Text_AnEggCantHoldAnItem_::
-	dr $194543, $19455e
-
-Text_PackNoItems_::
-	dr $19455e, $194569
-
-Text_ThrowAwayHowMany_::
-	dr $194569, $19457f
-
-Text_ConfirmThrowAway_::
-	dr $19457f, $19459c
-
-Text_ThrewAway_::
-	dr $19459c, $1945b2
-
-Text_ThisIsntTheTime_::
-	dr $1945b2, $1945db
-
-Text_YouDontHaveAPokemon_::
-	dr $1945db, $1945f2
-
-Text_RegisteredTheItem_::
-	dr $1945f2, $194609
-
-Text_CantRegisterThatItem_::
-	dr $194609, $194627
-
-Text_MoveItemWhere_::
-	dr $194627, $194647
-
-Text_PackEmptyString_::
-	dr $194647, $194649
-
-Text_CantUseItInABattle_::
-	dr $194649, $194953
-
-Text_WasSentToBillsPC_::
-	dr $194953, $19496e
-
-Text_GottaHavePokemon_::
-	dr $19496e, $19498c
-
-Text_BillsPCWhat_::
-	dr $19498c, $194993
-
-Text_PleaseRemoveMailBeforeMovePkmnWOMail_::
-	dr $194993, $1949ca
-
-Text_YouDontHaveASinglePokemon_::
-	dr $1949ca, $1949e8
-
-Text_ItsYourLastPokemon_::
-	dr $1949e8, $194a0a
-
-Text_CantTakeAnyMorePokemon_::
-	dr $194a0a, $194a28
-
-Text_CaughtBugMon_::
-	dr $194a28, $195610
-
-ClockTimeUnknownText_:: ; 195610
-	dr $195610, $195624
-
-OakText1_::
-	dr $195624, $195693
-
-OakText2_::
-	dr $195693, $1956d1
-
-OakText3_:: ; 1956d1
-	dr $1956d1, $1956d3
-
-OakText4_::
-	dr $1956d3, $19573f
-
-OakText5_::
-	dr $19573f, $1957b7
-
-OakText6_::
-	dr $1957b7, $1957dd
-
-OakText7_::
-	dr $1957dd, $195b84
-
-ObjectEventText_:: ; 195b84
-	dr $195b84, $195b93
-
-BGEventText_:: ; 195b93
-	dr $195b93, $195b9d
-
-CoordinatesEventText_:: ; 195b9d
-	dr $195b9d, $198000
-
-SECTION "bank66", ROMX, BANK[$66]
-	dr $198000, $1981e1
-Text_LearnedMove_::
-	dr $1981e1, $1981f8
-Text_ForgetWhich_::
-	dr $1981f8, $198219
-Text_StopLearning_::
-	dr $198219, $19822f
-Text_DidNotLearn_::
-	dr $19822f, $198249
-Text_TryingToLearn_::
-	dr $198249, $1982c0
-Text_1_2_and_Poof_::
-	dr $1982c0, $1982ce
-Text_PoofForgot_::
-	dr $1982ce, $1982f2
-Text_CantForgetHM_::
-	dr $1982f2, $1983a1
-
-Text_ThisMonCantBeCaught_::
-	dr $1983a1, $1983d7
-
-Text_YouMissedThePokemon_::
-	dr $1983d7, $1983ed
-
-Text_ThePokemonBrokeFree_::
-	dr $1983ed, $19840a
-
-Text_AppearedToBeCaught_::
-	dr $19840a, $19842a
-
-Text_AarghAlmostHadIt_::
-	dr $19842a, $198441
-
-Text_ShootItWasSoCloseToo_::
-	dr $198441, $19845e
-
-Text_GotchaMonWasCaught_::
-	dr $19845e, $19847c
-
-Text_CaughtMonWaitbutton_::
-	dr $19847c, $19847e
-
-Text_SentToBillsPC_::
-	dr $19847e, $198499
-
-Text_MonNewlyAddedToPokedex_::
-	dr $198499, $1984c4
-
-Text_AskNicknameNewlyCaughtMon_::
-	dr $1984c4, $1984df
-
-Text_StatRoseFromVitamin_::
-	dr $1984df, $1984f1
-
-Text_MilkDrinkCantBeUsed_::
-	dr $1984f1, $198512
-
-Text_RepelsEffectsStillLinger_::
-	dr $198512, $19853e
-
-Text_NowThatsACatchyTune_::
-	dr $19853e, $19856d
-
-Text_AllSleepingMonWokeUp_::
-	dr $19856d, $198589
-
-Text_PlayedThePokeFlute_::
-	dr $198589, $1985a3
-
-Text_CoinCase_::
-	dr $1985a3, $1985b1
-
-Text_RaiseThePPOfWhichMove_::
-	dr $1985b1, $1985ce
-
-Text_RestoreThePPOfWhichMove_::
-	dr $1985ce, $1985ed
-
-Text_PPIsMaxedOut_::
-	dr $1985ed, $198604
-
-Text_PPsIncreased_::
-	dr $198604, $198618
-
-Text_PPWasRestored_::
-	dr $198618, $19862a
-
-Text_TrohpyInside_::
-	dr $19862a, $198665
-
-Text_LooksBitter_::
-	dr $198665, $198677
-
-Text_CantUseOnEgg_::
-	dr $198677, $198695
-
-Text_IsntTheTimeToUseThat_::
-	dr $198695, $1986be
-
-Text_BelongsToSomeoneElse_::
-	dr $1986be, $1986dd
-
-Text_WontHaveAnyEffect_::
-	dr $1986dd, $1986f7
-
-Text_BlockedTheBall_::
-	dr $1986f7, $198716
-
-Text_DontBeAThief_::
-	dr $198716, $198728
-
-Text_CyclingIsntAllowed_::
-	dr $198728, $198744
-
-Text_CantGetOnYourItemNow_::
-	dr $198744, $198761
-
-Text_CantUseBallBoxIsFull_::
-	dr $198761, $19878f
-
-Text_UsedItem_::
-	dr $19878f, $1987a2
-
-Text_GotOnItem_::
-	dr $1987a2, $1987b7
-
-Text_GotOffItem_::
-	dr $1987b7, $1987cf
-
-Text_KnowsMove_::
-	dr $1987cf, $19c000
-
-SECTION "bank67", ROMX, BANK[$67]
-	dr $19c000, $1a0000
-
-SECTION "bank68", ROMX, BANK[$68]
-PokedexEntries1::
-	dr $1a0000, $1a4000
-
-SECTION "bank69", ROMX, BANK[$69]
-PokedexEntries2::
-	dr $1a4000, $1a8000
-
-SECTION "bank6a", ROMX, BANK[$6a]
-PokedexEntries3::
-	dr $1a8000, $1ac000
-
-SECTION "bank6b", ROMX, BANK[$6b]
-PokedexEntries4::
-	dr $1ac000, $1b0000
+INCLUDE "data/maps/scripts.asm"
 
 SECTION "bank6c", ROMX, BANK[$6c]
 ItemNames::
@@ -2006,7 +1504,9 @@ MoveNames::
 	dr $1b1574, $1b4000
 
 SECTION "bank6d", ROMX, BANK[$6d]
-	dr $1b4000, $1b8000
+INCLUDE "data/moves/descriptions.asm"
+
+	dr $1b61f3, $1b8000
 
 SECTION "bank6e", ROMX, BANK[$6e]
 	dr $1b8000, $1bc000
